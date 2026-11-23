@@ -5,6 +5,8 @@ import type { AppState } from '@/store/types'
 import type { Repo } from '../../../../../../shared/repository/repo-types'
 import { ProjectGroupNameDialog } from './ProjectGroupNameDialog'
 import { ProjectGroupDeleteDialog } from './ProjectGroupDeleteDialog'
+import { ProjectGroupAppearanceDialog } from './ProjectGroupAppearanceDialog'
+import type { ProjectGroup } from '../../../../../../shared/project/groups/project-group-types'
 import SuppressExternalWorktreeInboxDialog from '../listing/SuppressExternalWorktreeInboxDialog'
 import type { NewExternalWorktreesInboxActionState } from '../listing/new-external-worktrees-inbox-actions'
 import type { ProjectGroupDialogs } from './use-project-group-dialogs'
@@ -12,6 +14,7 @@ import type { ProjectGroupDialogs } from './use-project-group-dialogs'
 export function SidebarWorktreeListDialogs({
   dialogs,
   repos,
+  projectGroups,
   settings,
   suppressExternalWorktreeInboxRepoId,
   setSuppressExternalWorktreeInboxRepoId,
@@ -21,6 +24,7 @@ export function SidebarWorktreeListDialogs({
 }: {
   dialogs: ProjectGroupDialogs
   repos: readonly Repo[]
+  projectGroups: readonly ProjectGroup[]
   settings: AppState['settings']
   suppressExternalWorktreeInboxRepoId: string | null
   setSuppressExternalWorktreeInboxRepoId: (repoId: string | null) => void
@@ -129,6 +133,15 @@ export function SidebarWorktreeListDialogs({
         }}
         onConfirm={dialogs.handleConfirmDeleteProjectGroup}
         unsavedTargets={dialogs.deleteUnsavedTargets}
+      />
+      <ProjectGroupAppearanceDialog
+        target={dialogs.appearanceDialog}
+        projectGroups={projectGroups}
+        onOpenChange={(open) => {
+          if (!open) {
+            dialogs.setAppearanceDialog(null)
+          }
+        }}
       />
     </>
   )

@@ -12,6 +12,7 @@ import {
   type ExecutionHostId
 } from '../../../../../../shared/execution-host/execution-host'
 import { refreshFolderProjectGroup } from './project-group-folder-refresh'
+import type { ProjectGroupAppearanceDialogState } from './ProjectGroupAppearanceDialog'
 import {
   selectDetectedWorktreesByRepo,
   selectWorktreesByRepo
@@ -93,6 +94,8 @@ export function useProjectGroupDialogs(args: {
   const refreshingGroupIds = useRef(new Set<string>())
   const [nameDialog, setNameDialog] = useState<ProjectGroupNameDialogState | null>(null)
   const [deleteDialog, setDeleteDialog] = useState<ProjectGroupDeleteDialogState | null>(null)
+  const [appearanceDialog, setAppearanceDialog] =
+    useState<ProjectGroupAppearanceDialogState | null>(null)
 
   const handleCreateGroupFromRepo = useCallback((repo: Repo) => {
     setNameDialog({ type: 'create-from-repo', repo })
@@ -167,6 +170,10 @@ export function useProjectGroupDialogs(args: {
     },
     []
   )
+
+  const handleCustomizeProjectGroup = useCallback((groupId: string, hostId?: ExecutionHostId) => {
+    setAppearanceDialog({ groupId, hostId })
+  }, [])
 
   const handleSubmitProjectGroupName = useCallback(
     async (name: string) => {
@@ -289,6 +296,8 @@ export function useProjectGroupDialogs(args: {
     setNameDialog,
     deleteDialog,
     setDeleteDialog,
+    appearanceDialog,
+    setAppearanceDialog,
     deleteProjectCount,
     deleteProjectNames,
     removeContainedProjects,
@@ -299,6 +308,7 @@ export function useProjectGroupDialogs(args: {
     handleRefreshProjectGroup,
     handleRenameProjectGroup,
     handleCreateProjectSubgroup,
+    handleCustomizeProjectGroup,
     handleSubmitProjectGroupName,
     handleDeleteProjectGroup,
     handleConfirmDeleteProjectGroup

@@ -30,6 +30,7 @@ export type SectionHeaderRowContext = {
   projectActions: RepoHeaderProjectActions
   onRenameProjectGroup: (groupId: string, currentName: string, hostId?: ExecutionHostId) => void
   onCreateProjectSubgroup: (parentGroupId: string, hostId: ExecutionHostId) => void
+  onCustomizeProjectGroup: (groupId: string, hostId?: ExecutionHostId) => void
   onDeleteProjectGroup: (groupId: string, groupName: string, hostId?: ExecutionHostId) => void
   onRefreshProjectGroup?: (projectGroup: ProjectGroup) => void
   onCreateFolderWorkspace: (projectGroup: ProjectGroup) => void

@@ -7,6 +7,7 @@ import { WorkspaceAttachmentsSchema } from '../../../shared/workspace-attachment
 import { isWorkspaceLinkedItemSourceContextMatch } from '../../../shared/workspace-attachments/workspace-linked-item-source-context'
 import { DiffCommentSchema } from '../../../shared/file-review/diff-comment-schema'
 import { normalizeExecutionHostId } from '../../../shared/execution-host/execution-host'
+import { sanitizeRepoIcon } from '../../../shared/repository/appearance/repo-icon'
 import {
   FolderWorkspaceHookCreateShape,
   FolderWorkspaceDelete,
@@ -30,7 +31,11 @@ export const ProjectGroupUpdateArgs = z.object({
     tabOrder: z.number().finite().optional(),
     rootProjectOrder: z.number().finite().nullable().optional(),
     parentGroupId: z.string().min(1).nullable().optional(),
-    color: z.string().nullable().optional()
+    color: z.string().nullable().optional(),
+    icon: z
+      .unknown()
+      .transform((value) => sanitizeRepoIcon(value))
+      .optional()
   })
 })
 

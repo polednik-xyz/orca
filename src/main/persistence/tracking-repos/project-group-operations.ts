@@ -13,6 +13,7 @@ import {
   normalizeProjectGroupName
 } from '../../../shared/project/groups/project-groups'
 import { canMoveProjectGroup } from '../../../shared/project/groups/project-group-nesting'
+import { sanitizeRepoIcon } from '../../../shared/repository/appearance/repo-icon'
 import { getNextRootProjectOrder } from '../../../shared/sidebar-list/sections/root-project-order'
 import { folderWorkspaceKey } from '../../../shared/workspace/identity/workspace-scope'
 import { removeWorkspaceSessionOwnersEverywhere } from '../restoring-sessions/session-owner-removal'
@@ -209,6 +210,11 @@ export class ProjectGroupPersistenceOperations {
     }
     if (updates.color !== undefined) {
       group.color = typeof updates.color === 'string' ? updates.color : null
+    }
+    if (updates.icon === null) {
+      delete group.icon
+    } else if (updates.icon !== undefined) {
+      group.icon = sanitizeRepoIcon(updates.icon) ?? group.icon
     }
     if (updates.hookSettings !== undefined) {
       group.hookSettings = updates.hookSettings
