@@ -4,7 +4,7 @@ $features = @('origin/feat/project-groups-dnd', 'origin/feat/project-group-nesti
 
 Set-Location (Join-Path $PSScriptRoot '..')
 # VsDevCmd needs vswhere on PATH, or it reports VSCMD_VER=17.0 and Orca's native build rejects the toolchain.
-$env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
+$env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:USERPROFILE\.cargo\bin;$env:PATH"
 if (git status --porcelain --untracked-files=no) { throw 'Uncommitted changes in the build worktree; commit or discard them first.' }
 
 git fetch upstream main
