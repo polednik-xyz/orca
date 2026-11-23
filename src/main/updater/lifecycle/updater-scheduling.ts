@@ -10,6 +10,7 @@ import {
 } from './updater-state'
 import { UpdaterCheckFailure } from './updater-check-failure'
 import { getDelayedUpdateWakeDelayMs } from '../releases/updater-release-delay'
+import { PERSONAL_BUILD_NO_UPDATES } from '../personal-build-updates'
 
 export abstract class UpdaterScheduling extends UpdaterCheckFailure {
   protected getAutomaticRetryInterval(): number {
@@ -75,7 +76,7 @@ export abstract class UpdaterScheduling extends UpdaterCheckFailure {
     ) {
       return false
     }
-    if (!app.isPackaged) {
+    if (!app.isPackaged || PERSONAL_BUILD_NO_UPDATES) {
       this.sendStatus({ state: 'not-available' })
       return false
     }

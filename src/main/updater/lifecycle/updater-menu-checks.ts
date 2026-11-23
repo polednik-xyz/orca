@@ -6,6 +6,7 @@ import { updaterCodedMessage } from '../../../shared/updater/updater-failure-cop
 import { managesUpdates } from '../releases/updater-release-policy'
 import { UpdaterScheduling } from './updater-scheduling'
 import { isPendingTeamRestart } from './updater-state'
+import { PERSONAL_BUILD_NO_UPDATES } from '../personal-build-updates'
 
 export abstract class UpdaterMenuChecks extends UpdaterScheduling {
   protected checkForUpdatesFromMenu(options?: UpdateCheckOptions): void {
@@ -19,7 +20,7 @@ export abstract class UpdaterMenuChecks extends UpdaterScheduling {
     ) {
       return
     }
-    if (!app.isPackaged) {
+    if (!app.isPackaged || PERSONAL_BUILD_NO_UPDATES) {
       this.sendStatus({ state: 'not-available', userInitiated: true })
       return
     }

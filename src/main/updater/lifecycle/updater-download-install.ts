@@ -17,6 +17,8 @@ import {
 import { UpdaterRequiredRestart } from './updater-required-restart'
 import { prepareThisProcessShipItStaging } from '../mac-install/shipit-leftover-recovery'
 import type { UpdateInstallTrigger } from './updater-state'
+export { PERSONAL_BUILD_NO_UPDATES } from '../personal-build-updates'
+import { PERSONAL_BUILD_NO_UPDATES } from '../personal-build-updates'
 
 export abstract class UpdaterDownloadInstall extends UpdaterRequiredRestart {
   private macStagingTimer: ReturnType<typeof setTimeout> | null = null
@@ -172,6 +174,7 @@ export abstract class UpdaterDownloadInstall extends UpdaterRequiredRestart {
   private canDownloadAutomatically(version: string): boolean {
     return (
       app.isPackaged &&
+      !PERSONAL_BUILD_NO_UPDATES &&
       this.getAutomaticUpdates?.() === true &&
       this.implicitInstallOnQuit &&
       this.automaticDownloadOfferVersion === version &&

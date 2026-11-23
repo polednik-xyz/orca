@@ -24,7 +24,7 @@ import { registerAutoUpdaterHandlers } from '../updater-events'
 import { getServeUpdateHandoffFailure } from '../serve-update-handoff'
 import { recordUpdaterLifecycle } from '../updater-lifecycle-diagnostics'
 import { AUTO_UPDATE_CHECK_INTERVAL_MS, TEAM_POLICY_CHECK_RETRY_MS } from './updater-state'
-import { UpdaterDownloadInstall } from './updater-download-install'
+import { PERSONAL_BUILD_NO_UPDATES, UpdaterDownloadInstall } from './updater-download-install'
 import type { TeamRestartOptions } from './updater-required-restart'
 import { sameTeamUpdateRestartScope } from './team-update-restart-record'
 import { configureMacShipItScheduling } from '../mac-install/macos-shipit-scheduling'
@@ -170,7 +170,7 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
       this.sendErrorStatus(`The server update did not complete: ${serveHandoffFailure}`, true)
     }
 
-    if (!app.isPackaged) {
+    if (!app.isPackaged || PERSONAL_BUILD_NO_UPDATES) {
       return
     }
 
