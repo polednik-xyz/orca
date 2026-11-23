@@ -15,6 +15,8 @@ foreach ($ref in @('upstream/main') + $features) {
 
 pnpm install --frozen-lockfile
 if ($LASTEXITCODE -ne 0) { throw 'pnpm install failed' }
+pnpm -C mobile install --frozen-lockfile
+if ($LASTEXITCODE -ne 0) { throw 'mobile pnpm install failed' }
 pnpm build:win
 if ($LASTEXITCODE -ne 0) { throw 'pnpm build:win failed' }
 
