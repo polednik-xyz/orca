@@ -1,0 +1,22 @@
+$ErrorActionPreference = 'Stop'
+# Rebuilds the personal Orca: latest upstream main + the feature branches below, then the Windows installer.
+$features = @('origin/feat/project-groups-dnd', 'origin/feat/project-group-nesting')
+
+Set-Location (Join-Path $PSScriptRoot '..')
+if (git status --porcelain --untracked-files=no) { throw 'Uncommitted changes in the build worktree; commit or discard them first.' }
+
+git fetch upstream main
+git fetch origin
+foreach ($ref in @('upstream/main') + $features) {
+  Write-Host "Merging $ref"
+  git merge --no-edit $ref
+  if ($LASTEXITCODE -ne 0) { throw "Merge of $ref has conflicts; resolve them, commit, and rerun." }
+}
+
+pnpm install --frozen-lockfile
+if ($LASTEXITCODE -ne 0) { throw 'pnpm install failed' }
+pnpm build:win
+if ($LASTEXITCODE -ne 0) { throw 'pnpm build:win failed' }
+
+$installer = Get-ChildItem dist -Filter '*.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Write-Host "Installer: $($installer.FullName)"
