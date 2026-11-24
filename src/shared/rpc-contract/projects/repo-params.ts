@@ -12,6 +12,7 @@ import {
   requiredString
 } from '../rpc-param-primitives'
 import { createRepoUpdateSchema } from './repo-update-params'
+import { sanitizeRepoIcon } from '../../repository/appearance/repo-icon'
 import { RepoSelector, RepoShow } from '../github/github-repo-target-params'
 
 export const RepoPath = z.object({
@@ -99,7 +100,11 @@ export const ProjectGroupUpdate = z.object({
     tabOrder: OptionalFiniteNumber,
     rootProjectOrder: z.number().finite().nullable().optional(),
     parentGroupId: z.string().min(1).nullable().optional(),
-    color: OptionalString.nullable().optional()
+    color: OptionalString.nullable().optional(),
+    icon: z
+      .unknown()
+      .transform((value) => sanitizeRepoIcon(value))
+      .optional()
   })
 })
 

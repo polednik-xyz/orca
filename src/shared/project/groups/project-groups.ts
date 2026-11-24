@@ -3,6 +3,7 @@ import { normalizeExecutionHostId } from '../../execution-host/execution-host'
 import type { ProjectGroup, ProjectGroupCreatedFrom } from './project-group-types'
 import type { Repo } from '../../repository/repo-types'
 import { createNonSecureContextUuid } from '../../identifiers/non-secure-context-uuid'
+import { sanitizeRepoIcon } from '../../repository/appearance/repo-icon'
 import { normalizeProjectGroupRemoteMembers } from './project-group-remote-members'
 
 export const UNGROUPED_PROJECT_GROUP_KEY = 'project-group:ungrouped'
@@ -54,6 +55,7 @@ export function normalizeProjectGroups(value: unknown): ProjectGroup[] {
     seen.add(raw.id)
     const now = Date.now()
     const executionHostId = normalizeExecutionHostId(raw.executionHostId)
+    const icon = sanitizeRepoIcon(raw.icon)
     groups.push({
       id: raw.id,
       name: normalizeProjectGroupName(typeof raw.name === 'string' ? raw.name : ''),
@@ -87,6 +89,7 @@ export function normalizeProjectGroups(value: unknown): ProjectGroup[] {
         : {}),
       isCollapsed: raw.isCollapsed === true,
       color: typeof raw.color === 'string' ? raw.color : null,
+      ...(icon ? { icon } : {}),
       createdAt:
         typeof raw.createdAt === 'number' && Number.isFinite(raw.createdAt) ? raw.createdAt : now,
       updatedAt:

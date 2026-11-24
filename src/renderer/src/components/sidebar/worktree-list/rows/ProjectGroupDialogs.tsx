@@ -2,9 +2,12 @@ import React from 'react'
 import { useTranslate } from '@/i18n/use-translate'
 import { findRepoForHost } from '@/store/repos/repo-host-identity'
 import type { AppState } from '@/store/types'
+import { useAppStore } from '@/store'
+import { EMPTY_PROJECT_GROUPS } from '../viewport/viewport-props'
 import type { Repo } from '../../../../../../shared/repository/repo-types'
 import { ProjectGroupNameDialog } from './ProjectGroupNameDialog'
 import { ProjectGroupDeleteDialog } from './ProjectGroupDeleteDialog'
+import { ProjectGroupAppearanceDialog } from './ProjectGroupAppearanceDialog'
 import SuppressExternalWorktreeInboxDialog from '../listing/SuppressExternalWorktreeInboxDialog'
 import type { NewExternalWorktreesInboxActionState } from '../listing/new-external-worktrees-inbox-actions'
 import type { ProjectGroupDialogs } from './use-project-group-dialogs'
@@ -29,6 +32,7 @@ export function SidebarWorktreeListDialogs({
   onOpenWorktreeVisibility: (repo: Repo) => void
 }): React.JSX.Element {
   const t = useTranslate()
+  const projectGroups = useAppStore((s) => s.projectGroups ?? EMPTY_PROJECT_GROUPS)
   const { nameDialog, setNameDialog, deleteDialog, setDeleteDialog } = dialogs
   return (
     <>
@@ -129,6 +133,15 @@ export function SidebarWorktreeListDialogs({
         }}
         onConfirm={dialogs.handleConfirmDeleteProjectGroup}
         unsavedTargets={dialogs.deleteUnsavedTargets}
+      />
+      <ProjectGroupAppearanceDialog
+        target={dialogs.appearanceDialog}
+        projectGroups={projectGroups}
+        onOpenChange={(open) => {
+          if (!open) {
+            dialogs.setAppearanceDialog(null)
+          }
+        }}
       />
     </>
   )

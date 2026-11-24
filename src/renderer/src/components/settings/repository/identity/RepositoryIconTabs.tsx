@@ -1,17 +1,14 @@
 import { Suspense, useState } from 'react'
-import { toast } from 'sonner'
 import { Github, Image, Link2 } from 'lucide-react'
 import type { RepoIcon } from '../../../../../../shared/repository/appearance/repo-icon'
-import { faviconUrlFromWebsite } from '../../../../../../shared/repository/appearance/repo-icon'
 import { Button } from '../../../ui/button'
 import { Input } from '../../../ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip'
 import { getRepoLucideIconOptions } from '../../../repo/repo-icon'
-import { useMountedRef } from '@/hooks/useMountedRef'
 import { useTranslate } from '@/i18n/use-translate'
 import { lazyWithRetry } from '@/app-shell/startup/lazy-with-retry'
-import { repoIconPickFailureText } from './repo-icon-pick-failure-text'
+import { useRepositoryIconImagePicks } from './use-repository-icon-image-picks'
 
 const RepositoryIconEmojiPicker = lazyWithRetry(
   () =>
@@ -22,16 +19,20 @@ const RepositoryIconEmojiPicker = lazyWithRetry(
 )
 
 type RepositoryIconTabsProps = {
-  initialTab: 'avatar' | 'icon' | 'emoji'
+  initialTab: 'letters' | 'avatar' | 'icon' | 'emoji'
+  /** The monogram editor, shared with the sidebar project card; omitted for project groups. */
+  lettersPanel?: React.ReactNode
   selectedLucideName: string | null
   selectedEmoji: string
-  loadingGitHub: boolean
+  loadingGitHub?: boolean
   onSetIcon: (repoIcon: RepoIcon | null) => void
-  onUseGitHubAvatar: () => void
+  /** Omitted where there is no GitHub remote to take an avatar from, e.g. project groups. */
+  onUseGitHubAvatar?: () => void
 }
 
 export function RepositoryIconTabs({
   initialTab,
+  lettersPanel,
   selectedLucideName,
   selectedEmoji,
   loadingGitHub,
@@ -40,55 +41,21 @@ export function RepositoryIconTabs({
 }: RepositoryIconTabsProps): React.JSX.Element {
   const t = useTranslate()
   const [website, setWebsite] = useState('')
-  const mountedRef = useMountedRef()
 
-  const handleUploadImage = async () => {
-    try {
-      const result = await window.api.shell.pickRepoIconImage()
-      if (!result || !mountedRef.current) {
-        return
-      }
-      if ('error' in result) {
-        toast.error(repoIconPickFailureText(result))
-        return
-      }
-      onSetIcon({
-        type: 'image',
-        src: result.dataUrl,
-        source: 'upload',
-        label: result.fileName
-      })
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t(
-              'auto.components.settings.RepositoryIconPicker.868c5c9b56',
-              'Failed to import repo icon'
-            )
-      )
-    }
-  }
-
-  const handleUseWebsiteFavicon = () => {
-    const src = faviconUrlFromWebsite(website)
-    if (!src) {
-      toast.error(
-        t('auto.components.settings.RepositoryIconPicker.acf31559a0', 'Enter a valid website URL.')
-      )
-      return
-    }
-    onSetIcon({
-      type: 'image',
-      src,
-      source: 'favicon',
-      label: t('auto.components.settings.RepositoryIconPicker.4d039317f4', 'Website favicon')
-    })
+  const { uploadImage: handleUploadImage, applyWebsiteFavicon } =
+    useRepositoryIconImagePicks(onSetIcon)
+  const handleUseWebsiteFavicon = (): void => {
+    applyWebsiteFavicon(website)
   }
 
   return (
     <Tabs defaultValue={initialTab} className="gap-3">
       <TabsList variant="line" className="h-8">
+        {lettersPanel ? (
+          <TabsTrigger value="letters" className="h-7">
+            {t('auto.components.repo.ProjectPeek.styleLetters', 'Letters')}
+          </TabsTrigger>
+        ) : null}
         <TabsTrigger value="avatar" className="h-7 text-xs">
           {t('auto.components.settings.RepositoryIconPicker.2d8bd302fa', 'Avatar')}
         </TabsTrigger>
@@ -100,23 +67,29 @@ export function RepositoryIconTabs({
         </TabsTrigger>
       </TabsList>
 
+      {lettersPanel ? <TabsContent value="letters">{lettersPanel}</TabsContent> : null}
+
       <TabsContent value="avatar" className="space-y-3">
-        <Button
-          type="button"
-          variant="default"
-          className="w-full gap-2"
-          disabled={loadingGitHub}
-          onClick={() => void onUseGitHubAvatar()}
-        >
-          <Github className="size-3.5" />
-          {t('auto.components.settings.RepositoryIconPicker.cc76342291', 'Use GitHub avatar')}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          {t(
-            'auto.components.settings.RepositoryIconPicker.7da623abcc',
-            "Used by default — GitHub always provides one, even when the owner hasn't set a custom image."
-          )}
-        </p>
+        {onUseGitHubAvatar ? (
+          <>
+            <Button
+              type="button"
+              variant="default"
+              className="w-full gap-2"
+              disabled={loadingGitHub}
+              onClick={() => void onUseGitHubAvatar()}
+            >
+              <Github className="size-3.5" />
+              {t('auto.components.settings.RepositoryIconPicker.cc76342291', 'Use GitHub avatar')}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {t(
+                'auto.components.settings.RepositoryIconPicker.7da623abcc',
+                "Used by default — GitHub always provides one, even when the owner hasn't set a custom image."
+              )}
+            </p>
+          </>
+        ) : null}
         <Button
           type="button"
           variant="outline"

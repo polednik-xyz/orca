@@ -106,6 +106,9 @@ export type Section = {
   icon?: 'pin'
   repo?: SectionRepo
   isProjectGroup?: boolean
+  /** A group header's own icon (unread wire data until drawn) and badge color. */
+  projectGroupIcon?: unknown
+  projectGroupColor?: string
   projectGroupDepth?: number
   /** The header's own count from a feed-built list, which a collapsed section still shows. */
   count?: number

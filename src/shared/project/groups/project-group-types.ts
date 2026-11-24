@@ -1,4 +1,5 @@
 import type { RepoHookSettings } from '../../workspace-setup/orca-yaml-hook-types'
+import type { RepoIcon } from '../../repository/appearance/repo-icon'
 export type ProjectGroupCreatedFrom = 'manual' | 'folder-scan' | 'migration'
 
 export type ProjectGroup = {
@@ -18,6 +19,7 @@ export type ProjectGroup = {
   rootProjectOrder?: number
   isCollapsed: boolean
   color: string | null
+  icon?: RepoIcon | null
   createdAt: number
   updatedAt: number
 }
@@ -27,7 +29,7 @@ export type ProjectGroupRemoteMember = { hostId: string; projectId: string; orde
 export type ProjectGroupUpdate = Partial<
   Pick<
     ProjectGroup,
-    'name' | 'isCollapsed' | 'tabOrder' | 'color' | 'hookSettings' | 'remoteMembers'
+    'name' | 'isCollapsed' | 'tabOrder' | 'color' | 'icon' | 'hookSettings' | 'remoteMembers'
   >
 > & { rootProjectOrder?: number | null; parentGroupId?: string | null }
 

@@ -12,8 +12,8 @@ import {
 import { runtimeEnvironmentSupportsCapability } from '@/runtime/rpc/compatibility/runtime-capability-proof'
 import { callRuntimeRpc } from '@/runtime/rpc/calls/runtime-rpc-call'
 
-// Why: older hosts strip keys they don't know, so an unapplied move or order must read as a failure.
-function groupOrderMatchesUpdate(
+// Why: older hosts strip keys they don't know, so an unapplied move, order or icon must read as a failure.
+function groupMatchesUpdate(
   group: ProjectGroup,
   updates: ProjectGroupMutation['updates']
 ): boolean {
@@ -22,7 +22,8 @@ function groupOrderMatchesUpdate(
       (group.parentGroupId ?? null) === updates.parentGroupId) &&
     (updates.rootProjectOrder === undefined ||
       (group.rootProjectOrder ?? null) === updates.rootProjectOrder) &&
-    (updates.tabOrder === undefined || group.tabOrder === updates.tabOrder)
+    (updates.tabOrder === undefined || group.tabOrder === updates.tabOrder) &&
+    (updates.icon === undefined || (updates.icon === null) === !group.icon)
   )
 }
 
@@ -52,7 +53,7 @@ export async function persistProjectGroupUpdate(
             { timeoutMs: 15_000 }
           )
         ).group
-  if (!updated || !groupOrderMatchesUpdate(updated, updates)) {
+  if (!updated || !groupMatchesUpdate(updated, updates)) {
     return null
   }
   return updated
@@ -106,7 +107,7 @@ export async function persistProjectGroupUpdates(
   const byId = new Map(updated?.map((group) => [group.id, group]))
   return mutations.map(({ groupId, updates }) => {
     const group = byId.get(groupId)
-    return group && groupOrderMatchesUpdate(group, updates) ? group : null
+    return group && groupMatchesUpdate(group, updates) ? group : null
   })
 }
 

@@ -7,7 +7,6 @@ import { ChevronDown } from 'lucide-react'
 import { ProjectHeaderHostLabel, ProjectHeaderHostTooltip } from './ProjectHeaderHostLabel'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { cn } from '@/lib/class-names'
-import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
 
 import '@/store/project-groups/project-group-owner-routing'
@@ -24,6 +23,7 @@ import { translateWorkspaceStatusHeaderLabel } from '../../workspace-status/pres
 import { getVirtualRowTransform } from '../viewport/virtual-rows'
 import { getSidebarHeaderVisual } from './header-visuals'
 import { resolveProjectGroupHeaderColor } from './project-header-color'
+import { SectionHeaderGlyph } from './section-header-glyph'
 import { ProjectHeaderActions } from './ProjectHeaderActions'
 import {
   getProjectGroupHeaderPaddingLeft,
@@ -318,16 +318,12 @@ export function renderWorktreeSectionHeaderRow(
                 repoHeaderColor ? 'text-muted-foreground' : headerVisual.tone
               )}
             >
-              {row.repo ? (
-                <RepoIconGlyph
-                  repoIcon={row.repo.repoIcon}
-                  color={repoHeaderColor}
-                  className="size-4"
-                  iconClassName="size-3.5"
-                />
-              ) : (
-                <headerVisual.icon className="size-3" />
-              )}
+              <SectionHeaderGlyph
+                row={row}
+                repoColor={repoHeaderColor}
+                isGroupHeader={projectGroupIdForHeader !== undefined}
+                fallback={headerVisual.icon}
+              />
             </div>
 
             <div className="min-w-0 flex-1">
@@ -370,6 +366,7 @@ export function renderWorktreeSectionHeaderRow(
                 onRefreshProjectGroup={ctx.onRefreshProjectGroup}
                 onRename={ctx.onRenameProjectGroup}
                 onCreateSubgroup={ctx.onCreateProjectSubgroup}
+                onCustomize={ctx.onCustomizeProjectGroup}
                 onDelete={ctx.onDeleteProjectGroup}
               />
             ) : null}

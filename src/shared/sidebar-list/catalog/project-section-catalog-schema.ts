@@ -6,6 +6,7 @@ import type {
   ProjectGroupCreatedFrom
 } from '../../project/groups/project-group-types'
 import type { RepoKind } from '../../repository/repo-types'
+import { sanitizeRepoIcon } from '../../repository/appearance/repo-icon'
 import type { ProjectOrderBy } from '../../ui-chrome/ui-chrome-types'
 import { hostUnionArms, salvagedOptional, salvagingArray } from '../../validation/zod-salvage'
 
@@ -79,6 +80,11 @@ export const ProjectGroupSchema = z.object({
   rootProjectOrder: salvagedOptional('rootProjectOrder', z.number().finite()),
   isCollapsed: z.boolean(),
   color: z.string().nullable(),
+  // Why: a malformed or unknown icon arm drops to the default glyph instead of the group.
+  icon: z
+    .unknown()
+    .transform((value) => sanitizeRepoIcon(value) ?? undefined)
+    .optional(),
   createdAt: z.number(),
   updatedAt: z.number()
 }) satisfies z.ZodType<ProjectGroup, unknown>
