@@ -2,6 +2,7 @@ import { closeRemoteRuntimeSocket } from '../remote-runtime-socket-close'
 import { throwIfSignalAborted, abortSignalReason } from '../../concurrency/abort-signal-reason'
 import { randomUUID } from 'node:crypto'
 import WebSocket from 'ws'
+import { withRemoteRuntimeSocketConnector } from '../remote-runtime-socket-connector'
 import type { PairedRuntimeConnection } from '../pairing/paired-runtime-connection'
 import {
   formatRemoteRuntimeCloseMessage,
@@ -208,7 +209,10 @@ export async function subscribeRemoteRuntimeTransport<TResult>(
       options?.connectTimeoutMs
     )
     try {
-      ws = new WebSocket(connection.endpoint, connectOptions)
+      ws = new WebSocket(
+        connection.endpoint,
+        withRemoteRuntimeSocketConnector(connection.endpoint, connectOptions)
+      )
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       fail(new RemoteRuntimeClientError('invalid_argument', `Invalid remote endpoint: ${message}`))

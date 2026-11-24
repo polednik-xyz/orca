@@ -26,6 +26,7 @@ import {
   shouldRouteSubscriptionBySupport,
   subscribeSupportRoutedRuntimeEnvironment
 } from './runtime-environment-support-routing'
+import { getRuntimeEnvironmentDialConnection } from '../relay-route/runtime-relay-route'
 
 const DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS = 15_000
 // A browser pane on a host's page or dev server is use the host's idle probes cannot see.
@@ -83,9 +84,10 @@ export async function subscribeRuntimeEnvironment(
   await crewAttempt?.assertCurrent()
   throwIfSignalAborted(signal)
   if (crewAttempt) {
-    assertCrewSourceCurrent(environment)
+    assertCrewSourceCurrent(userDataPath, environment)
   }
-  const pairedConnection = getPreferredPairedRuntimeConnection(environment)
+  const pairedConnection = getRuntimeEnvironmentDialConnection(userDataPath, environment)
+  const hintEndpoint = getPreferredPairedRuntimeConnection(environment).endpoint
   const effectiveTimeoutMs = timeoutMs ?? DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS
   let markedUsed = false
   const markUsedOnce = (runtimeId: string): void => {
@@ -118,7 +120,7 @@ export async function subscribeRuntimeEnvironment(
       callbacks.onEvent({
         type: 'error' as const,
         code: error.code,
-        message: withRuntimeUnreachableHint(environment, error.message, pairedConnection.endpoint)
+        message: withRuntimeUnreachableHint(environment, error.message, hintEndpoint)
       }),
     onClose: () => {
       callbacks.onEvent({ type: 'close' as const })
@@ -161,7 +163,7 @@ export async function subscribeRuntimeEnvironment(
           throwIfSignalAborted(signal)
           await crewAttempt.assertCurrent()
           throwIfSignalAborted(signal)
-          assertCrewSourceCurrent(environment)
+          assertCrewSourceCurrent(userDataPath, environment)
         } catch (error) {
           subscription.close()
           throw error
@@ -170,11 +172,7 @@ export async function subscribeRuntimeEnvironment(
       return subscription
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
-        error.message = withRuntimeUnreachableHint(
-          environment,
-          error.message,
-          pairedConnection.endpoint
-        )
+        error.message = withRuntimeUnreachableHint(environment, error.message, hintEndpoint)
       }
       crewAttempt?.observeFailure(runtimeEnvironmentSetupFailure(error, 'subscription'))
       throw error

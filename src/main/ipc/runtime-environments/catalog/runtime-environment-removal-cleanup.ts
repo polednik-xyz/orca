@@ -3,6 +3,7 @@ import '../../../media/media-preview-protocol'
 import { revokeRemoteFilePreviewGrants } from '../../../media/preview-grant-registry'
 import { clearBrowserRoutePartitionStorageForEnvironment } from '../../../browser/routing/partitions/browser-route-partition-storage-runtime'
 import { retireBrowserRoutePartitionStorageForEnvironment } from '../../../browser/routing/partitions/browser-route-partition-storage-retirement'
+import { deleteRuntimeRelayRoute } from '../relay-route/runtime-relay-route-store'
 import { clearRuntimeEnvironmentCapabilityEvidence } from '../connections/runtime-environment-capability-evidence'
 import { clearRuntimeEnvironmentManualDisconnect } from '../connectivity/runtime-environment-manual-disconnect'
 import {
@@ -29,6 +30,11 @@ export function retireRemovedRuntimeEnvironment(
 ): Promise<void> {
   if (userDataPath) {
     void desktopChatCreationHistory(userDataPath).removeEnvironment(environmentId)
+    try {
+      deleteRuntimeRelayRoute(userDataPath, environmentId)
+    } catch (error) {
+      console.warn('[runtime-environments] Relay route removal failed:', error)
+    }
   }
   clearRuntimeEnvironmentCapabilityEvidence(environmentId)
   revokeRemoteFilePreviewGrants(environmentId)

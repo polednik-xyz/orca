@@ -7,10 +7,7 @@ import type {
   RuntimeRpcResponse
 } from '../../../../shared/remote-runtime/rpc/runtime-rpc-envelope'
 
-import {
-  type KnownRuntimeEnvironment,
-  getPreferredPairedRuntimeConnection
-} from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
+import type { KnownRuntimeEnvironment } from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
 import { resolveEnvironment } from '../../../../shared/remote-runtime/host-store/runtime-environment-store'
 import { recordRuntimeEnvironmentUsage } from '../../../../shared/remote-runtime/host-store/runtime-environment-usage-record'
 import { ELECTRON_REMOTE_RUNTIME_CLIENT_CAPABILITIES } from '../../../../shared/remote-runtime/protocol/electron-remote-runtime-client-capabilities'
@@ -36,6 +33,7 @@ import {
   subscribeRemoteRuntimeSharedControlRequest
 } from '../connections/runtime-environment-request-connections'
 import { sendSupportRoutedCallOnRuntime } from './runtime-environment-runtime-pinned-send'
+import { getRuntimeEnvironmentDialConnection } from '../relay-route/runtime-relay-route'
 
 type SupportRoute = {
   environment: KnownRuntimeEnvironment
@@ -225,7 +223,7 @@ export async function routeRuntimeEnvironmentCallBySupport(args: {
     if (revisionFailure) {
       return revisionFailure
     }
-    const connection = getPreferredPairedRuntimeConnection(environment)
+    const connection = getRuntimeEnvironmentDialConnection(args.userDataPath, environment)
     const outcome = await waitForPromiseWithSignal(
       supportsSharedControl(args.userDataPath, environment, connection, args.timeoutMs),
       args.signal
@@ -261,7 +259,7 @@ export async function routeRuntimeEnvironmentSubscriptionBySupport<TSubscription
   supported: (route: SupportRoute) => Promise<TSubscription>
   unsupported: (route: SupportRoute) => Promise<TSubscription>
 }): Promise<{ subscription: TSubscription; outcome: SupportRoute['outcome'] }> {
-  const connection = getPreferredPairedRuntimeConnection(args.environment)
+  const connection = getRuntimeEnvironmentDialConnection(args.userDataPath, args.environment)
   const outcome = await waitForPromiseWithSignal(
     supportsSharedControl(args.userDataPath, args.environment, connection, args.timeoutMs),
     args.signal
@@ -287,7 +285,7 @@ function subscriptionCallbacks(
   >,
   shouldMarkUsed: () => boolean
 ) {
-  const connection = getPreferredPairedRuntimeConnection(args.environment)
+  const connection = getRuntimeEnvironmentDialConnection(args.userDataPath, args.environment)
   return {
     onResponse: (response: RuntimeRpcResponse<unknown>) => {
       if (response.ok && shouldMarkUsed()) {
