@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { ChevronRight, FolderTree, Pin } from 'lucide-react-native'
 import { DisclosureChevron } from '../../components/list/DisclosureChevron'
 import { MobileRepoIcon } from '../../components/icons/MobileRepoIcon'
+import { readMobileRepoIcon } from '../host-screen-reply-schema'
 import { WORKTREE_ROW_LAYOUT } from '../../worktree/row-presentation/worktree-list-row-layout'
 import { colors } from '../../theme/mobile-theme'
 import { useMobileColorScheme } from '../../theme/use-mobile-color-scheme'
@@ -11,12 +12,15 @@ import { hostScreenStyles as styles } from '../host-screen-styles'
 import type { RepoLook } from '../catalog/host-repo-looks'
 import { HostPendingCreationRow } from './host-pending-creation-row'
 import { projectGroupHeaderIndent } from '../../worktree/project-sections/project-group-indent'
+import { resolveRepoBadgeColor } from '../../../../src/shared/repository/appearance/repo-badge-color'
 
 // Takes the header's own fields, not the section, so a poll that rebuilds sections skips unchanged headers.
 export const HostSectionHeader = memo(function HostSectionHeader(props: {
   title: string
   icon: Section['icon']
   isProjectGroup: boolean | undefined
+  projectGroupIcon: unknown
+  projectGroupColor: string | undefined
   projectGroupDepth: number | undefined
   pendingCreations: Section['pendingCreations']
   collapseKey: string
@@ -34,6 +38,11 @@ export const HostSectionHeader = memo(function HostSectionHeader(props: {
   if (!props.title) {
     return pendingCreations ? <>{pendingCreations}</> : null
   }
+  // Desktop strips uploaded data-URL icons from the phone feed, so those fall back to the folder glyph.
+  const groupIcon = props.isProjectGroup ? readMobileRepoIcon(props.projectGroupIcon) : null
+  const groupColor = props.projectGroupColor
+    ? resolveRepoBadgeColor(props.projectGroupColor)
+    : colors.textPrimary
   return (
     <>
       <Pressable
@@ -58,8 +67,12 @@ export const HostSectionHeader = memo(function HostSectionHeader(props: {
         {props.icon === 'pin' && (
           <Pin size={12} color={colors.textMuted} style={styles.sectionIcon} />
         )}
-        {props.groupByRepo && props.isProjectGroup ? (
-          <FolderTree size={12} color={colors.textPrimary} style={styles.sectionIcon} />
+        {props.groupByRepo && props.isProjectGroup && groupIcon ? (
+          <View style={styles.sectionRepoIcon}>
+            <MobileRepoIcon repoIcon={groupIcon} size={14} color={groupColor} />
+          </View>
+        ) : props.groupByRepo && props.isProjectGroup ? (
+          <FolderTree size={12} color={groupColor} style={styles.sectionIcon} />
         ) : props.groupByRepo ? (
           <View style={styles.sectionRepoIcon}>
             <MobileRepoIcon

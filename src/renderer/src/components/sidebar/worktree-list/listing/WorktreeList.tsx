@@ -304,6 +304,7 @@ const WorktreeList = React.memo(function WorktreeList({
       <SidebarWorktreeListDialogs
         dialogs={projectGroupDialogs}
         repos={repos}
+        projectGroups={projectGroups}
         settings={settings}
         suppressExternalWorktreeInboxRepoId={
           externalWorktreeCards.suppressExternalWorktreeInboxRepoId
@@ -356,6 +357,7 @@ const WorktreeList = React.memo(function WorktreeList({
         handleRemoveProjectFromGroup={projectGroupDialogs.handleRemoveProjectFromGroup}
         handleRenameProjectGroup={projectGroupDialogs.handleRenameProjectGroup}
         handleCreateProjectSubgroup={projectGroupDialogs.handleCreateProjectSubgroup}
+        handleCustomizeProjectGroup={projectGroupDialogs.handleCustomizeProjectGroup}
         handleDeleteProjectGroup={projectGroupDialogs.handleDeleteProjectGroup}
         handleRefreshProjectGroup={projectGroupDialogs.handleRefreshProjectGroup}
         handleCreateFolderWorkspace={handleCreateFolderWorkspace}

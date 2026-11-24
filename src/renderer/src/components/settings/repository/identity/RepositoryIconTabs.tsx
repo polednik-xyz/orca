@@ -25,9 +25,10 @@ type RepositoryIconTabsProps = {
   initialTab: 'avatar' | 'icon' | 'emoji'
   selectedLucideName: string | null
   selectedEmoji: string
-  loadingGitHub: boolean
+  loadingGitHub?: boolean
   onSetIcon: (repoIcon: RepoIcon | null) => void
-  onUseGitHubAvatar: () => void
+  /** Omitted where there is no GitHub remote to take an avatar from, e.g. project groups. */
+  onUseGitHubAvatar?: () => void
 }
 
 export function RepositoryIconTabs({
@@ -101,22 +102,26 @@ export function RepositoryIconTabs({
       </TabsList>
 
       <TabsContent value="avatar" className="space-y-3">
-        <Button
-          type="button"
-          variant="default"
-          className="w-full gap-2"
-          disabled={loadingGitHub}
-          onClick={() => void onUseGitHubAvatar()}
-        >
-          <Github className="size-3.5" />
-          {t('auto.components.settings.RepositoryIconPicker.cc76342291', 'Use GitHub avatar')}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          {t(
-            'auto.components.settings.RepositoryIconPicker.7da623abcc',
-            "Used by default — GitHub always provides one, even when the owner hasn't set a custom image."
-          )}
-        </p>
+        {onUseGitHubAvatar ? (
+          <>
+            <Button
+              type="button"
+              variant="default"
+              className="w-full gap-2"
+              disabled={loadingGitHub}
+              onClick={() => void onUseGitHubAvatar()}
+            >
+              <Github className="size-3.5" />
+              {t('auto.components.settings.RepositoryIconPicker.cc76342291', 'Use GitHub avatar')}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {t(
+                'auto.components.settings.RepositoryIconPicker.7da623abcc',
+                "Used by default — GitHub always provides one, even when the owner hasn't set a custom image."
+              )}
+            </p>
+          </>
+        ) : null}
         <Button
           type="button"
           variant="outline"

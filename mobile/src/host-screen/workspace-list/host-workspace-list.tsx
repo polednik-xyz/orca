@@ -130,6 +130,8 @@ export function HostWorkspaceList({
             title={section.title}
             icon={section.icon}
             isProjectGroup={section.isProjectGroup}
+            projectGroupIcon={section.projectGroupIcon}
+            projectGroupColor={section.projectGroupColor}
             projectGroupDepth={section.projectGroupDepth}
             pendingCreations={section.pendingCreations}
             collapseKey={collapseKey}

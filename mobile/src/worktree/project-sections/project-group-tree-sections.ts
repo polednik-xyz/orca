@@ -13,6 +13,7 @@ import type {
   Worktree,
   WorktreeRowView
 } from '../workspace-list/workspace-list-types'
+import { projectGroupLook } from './project-group-look'
 
 type ProjectEntry = [string, ProjectSectionEntry<Worktree, SectionRepo>]
 
@@ -138,6 +139,7 @@ export function planProjectGroupTree<S extends object>(args: {
         sections.push({
           ...args.groupSection(key, group.name, rows),
           isProjectGroup: true,
+          ...projectGroupLook(group),
           count,
           ...atDepth(depth)
         })

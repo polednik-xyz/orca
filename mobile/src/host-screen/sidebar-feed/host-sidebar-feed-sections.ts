@@ -30,6 +30,7 @@ import {
   type MobileViewState
 } from '../../worktree/workspace-list/workspace-view-settings'
 import type { HiddenProjects } from '../../../../src/shared/project/catalog/hidden-projects'
+import { projectGroupLook } from '../../worktree/project-sections/project-group-look'
 
 export type HostFeedListSources = {
   rows: readonly HostSectionRow[]
@@ -173,7 +174,9 @@ export function buildHostFeedSections(sources: HostFeedListSources): Section[] {
           count: row.count,
           ...(row.icon.kind === 'pinned' ? { icon: 'pin' as const } : {}),
           ...(row.repo ? { repo: row.repo } : {}),
-          ...(row.projectGroup && !row.repo ? { isProjectGroup: true } : {}),
+          ...(row.projectGroup && !row.repo
+            ? { isProjectGroup: true, ...projectGroupLook(row.projectGroup) }
+            : {}),
           ...(row.projectGroupDepth ? { projectGroupDepth: row.projectGroupDepth } : {}),
           data: []
         })

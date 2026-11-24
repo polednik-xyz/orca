@@ -1,5 +1,5 @@
 import React from 'react'
-import { Ellipsis, Plus, RefreshCw } from 'lucide-react'
+import { Ellipsis, Palette, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
@@ -32,6 +32,7 @@ export function ProjectGroupHeaderMenu({
   onRefreshProjectGroup,
   onRename,
   onCreateSubgroup,
+  onCustomize,
   onDelete
 }: {
   groupId: string
@@ -43,6 +44,7 @@ export function ProjectGroupHeaderMenu({
   onRefreshProjectGroup?: (projectGroup: ProjectGroup) => void
   onRename: (groupId: string, currentName: string, hostId?: ExecutionHostId) => void
   onCreateSubgroup: (parentGroupId: string, hostId: ExecutionHostId) => void
+  onCustomize: (groupId: string, hostId?: ExecutionHostId) => void
   onDelete: (groupId: string, groupName: string, hostId?: ExecutionHostId) => void
 }): React.JSX.Element {
   const t = useTranslate()
@@ -88,6 +90,10 @@ export function ProjectGroupHeaderMenu({
         ) : null}
         <DropdownMenuItem onSelect={() => onRename(groupId, label, hostId)}>
           {t('auto.components.sidebar.WorktreeList.4d7b73658c', 'Rename group')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onCustomize(groupId, hostId)}>
+          <Palette className="size-3.5" />
+          {t('auto.components.sidebar.WorktreeList.customizeGroup', 'Icon and color…')}
         </DropdownMenuItem>
         {hostId ? (
           <ProjectGroupNestingMenuItems

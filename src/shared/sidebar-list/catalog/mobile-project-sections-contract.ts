@@ -86,7 +86,12 @@ export function buildMobileProjectSectionCatalog(
     projectOrderBy,
     // Why: like repos, groups reach phones without their hook commands.
     ...(projectGroups
-      ? { projectGroups: projectGroups.map(({ hookSettings: _hooks, ...group }) => group) }
+      ? {
+          projectGroups: projectGroups.map(({ hookSettings: _hooks, icon, ...group }) => ({
+            ...group,
+            ...(icon && !(icon.type === 'image' && icon.src.startsWith('data:')) ? { icon } : {})
+          }))
+        }
       : {})
   }
 }
