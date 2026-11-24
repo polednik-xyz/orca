@@ -5,7 +5,10 @@ import { useTranslate } from '@/i18n/use-translate'
 import { useAppStore } from '@/store/index'
 import { EMPTY_FORM, type EditingTarget } from '../../../ssh-host-form/ssh-target-draft'
 import type { SshConfigHostSummary } from '../../../../../../shared/remote-runtime/ssh/ssh-types'
-import { parseHostAccessLink } from '../../../../../../shared/remote-runtime/pairing/remote-pairing-address'
+import {
+  hostAccessLinkNeedsTunnel,
+  parseHostAccessLink
+} from '../../../../../../shared/remote-runtime/pairing/remote-pairing-address'
 import {
   translateHostAccessLinkError,
   translateRemotePairingFailureDescription
@@ -65,7 +68,7 @@ export function AddRemoteHostDialog({
   const serverFormCanSubmit =
     serverName.trim() !== '' &&
     parsedServerLink.ok &&
-    (parsedServerLink.value.endpointKind !== 'loopback' || allowLoopback)
+    (!hostAccessLinkNeedsTunnel(parsedServerLink.value) || allowLoopback)
   const setSshTargetsMetadata = useAppStore((s) => s.setSshTargetsMetadata)
   const recordSshRepoReadoptions = useAppStore((s) => s.recordSshRepoReadoptions)
   const setRuntimeEnvironments = useAppStore((s) => s.setRuntimeEnvironments)
@@ -253,7 +256,7 @@ export function AddRemoteHostDialog({
       toast.error(translateHostAccessLinkError(parsedServerLink.kind))
       return
     }
-    if (parsedServerLink.value.endpointKind === 'loopback' && !allowLoopback) {
+    if (hostAccessLinkNeedsTunnel(parsedServerLink.value) && !allowLoopback) {
       toast.error(
         t(
           'auto.components.sidebar.AddRemoteHostDialog.loopbackBlocked',

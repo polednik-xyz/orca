@@ -2468,7 +2468,8 @@
         "tailscale": "Tailscale address",
         "lan": "Private LAN address",
         "public": "Public address",
-        "custom": "Custom hostname"
+        "custom": "Custom hostname",
+        "relay": "Orca Relay"
       },
       "ensure": {
         "simulator": {
@@ -10121,6 +10122,10 @@
           "hostModelCapabilityTaskSourceContext": "task source context",
           "hostModelCapabilityWorkspaceRunContext": "workspace run context",
           "serverConnected": "Connected",
+          "routeRelay": "Orca Relay",
+          "routeDirectTailscale": "Direct · Tailscale",
+          "routeDirectLan": "Direct · LAN",
+          "routeDirect": "Direct",
           "serverWorkspaceWindowClosed": "Workspace window closed",
           "serverRuntimeUnavailable": "Orca unavailable",
           "serverRuntimeUnavailableDescription": "SSH transport is connected, but the Orca runtime did not answer. The host may still be running.",
@@ -10146,6 +10151,14 @@
           "serverReplaced": "{{value0}} is not the Orca server this computer paired with: Orca connects to the host as a different SSH user, or its server was reinstalled. Open the ⋯ menu here and choose Forget…, then connect the SSH host to pair with its current server.",
           "6f303a89a3": "Switch server",
           "4ae8a4a381": "Remove server"
+        },
+        "RuntimeRelaySharePanel": {
+          "title": "Orca Relay",
+          "unavailable": "Orca Relay isn’t available here. Share over LAN, Tailscale, or a custom address.",
+          "ready": "The other Orca tries this computer’s LAN or Tailscale address first, then Orca Relay. Traffic stays end-to-end encrypted.",
+          "signInRequired": "Sign in to an Orca account to share through Orca Relay.",
+          "signInAgain": "Sign in again for Relay",
+          "signIn": "Sign in for Relay"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copy {{value0}}"
@@ -10180,6 +10193,8 @@
           "custom-use": "Use address",
           "anotherDevice": "Another device",
           "anotherDeviceHelp": "Tailscale, LAN, or another reachable address",
+          "anyNetwork": "Any network",
+          "anyNetworkHelp": "Through Orca Relay when there is no direct path",
           "localOnlyHelp": "A browser or Orca client on this computer",
           "customAddress": "Custom address",
           "customAddressHelp": "SSH tunnel, reverse proxy, or custom hostname",
@@ -10194,6 +10209,7 @@
           "browserLinkLabel": "Browser link",
           "accessLinkLabel": "Access link",
           "accessLinkHelp": "Paste this into Add server on the other Orca.",
+          "relayLinkHelp": "Paste this into Add server on the other Orca. It works once.",
           "staleAddressCreate": "The connection address changed. Create a new link for {{address}}.",
           "linkExpired": "Link expired",
           "unusedLinkExpires": "Unused link expires at {{time}}"

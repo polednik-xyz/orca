@@ -9,10 +9,9 @@ import { useTranslate } from '@/i18n/use-translate'
 import { RuntimePairingGeneratorForm } from './RuntimePairingGeneratorForm'
 import {
   RUNTIME_PAIRING_LOOPBACK_ADDRESS,
-  cacheGeneratedRuntimePairingLink,
   clearGeneratedRuntimePairingLink,
+  requestRuntimePairingLink,
   runtimePairingLinkCache,
-  runtimePairingReachForIntent,
   selectRuntimePairingIntent,
   type RuntimePairingIntent
 } from './runtime-pairing-link-state'
@@ -55,6 +54,9 @@ export function RuntimePairingUrlGenerator({
     runtimePairingLinkCache.runtimePairingDeviceId
   )
   const [expiresAt, setExpiresAt] = useState(runtimePairingLinkCache.expiresAt)
+  const [generatedViaRelay, setGeneratedViaRelay] = useState(
+    runtimePairingLinkCache.generatedViaRelay
+  )
   const [refreshingNetworkInterfaces, setRefreshingNetworkInterfaces] = useState(false)
   const [revokingGrantId, setRevokingGrantId] = useState<string | null>(null)
   const [isGeneratingPairing, setIsGeneratingPairing] = useState(false)
@@ -125,6 +127,7 @@ export function RuntimePairingUrlGenerator({
       setRuntimePairingDeviceId(null)
       setGeneratedAddress(null)
       setExpiresAt(null)
+      setGeneratedViaRelay(false)
     }
   }
 
@@ -137,12 +140,7 @@ export function RuntimePairingUrlGenerator({
     }
     setIsGeneratingPairing(true)
     try {
-      const result = await window.api.mobile.getRuntimePairingUrl({
-        address,
-        rotate: true,
-        // Send declared reach with the address; loopback alone cannot distinguish local-only intent from a tunnel frontend.
-        reach: runtimePairingReachForIntent(intent)
-      })
+      const result = await requestRuntimePairingLink(intent, address)
       if (!result.available) {
         clearGeneratedUrls()
         if (mountedRef.current) {
@@ -157,19 +155,13 @@ export function RuntimePairingUrlGenerator({
         }
         return
       }
-      cacheGeneratedRuntimePairingLink({
-        address,
-        pairingUrl: result.pairingUrl,
-        webClientUrl: result.webClientUrl,
-        deviceId: result.deviceId,
-        expiresAt: result.expiresAt ?? null
-      })
       if (mountedRef.current) {
         setRuntimePairingUrl(result.pairingUrl)
         setWebClientUrl(result.webClientUrl)
         setRuntimePairingDeviceId(result.deviceId)
         setGeneratedAddress(address)
-        setExpiresAt(result.expiresAt ?? null)
+        setExpiresAt(result.expiresAt)
+        setGeneratedViaRelay(result.viaRelay)
       }
       await loadRuntimeAccessGrants()
       if (mountedRef.current) {
@@ -320,6 +312,7 @@ export function RuntimePairingUrlGenerator({
           runtimePairingUrl={runtimePairingUrl}
           copiedTarget={copiedTarget}
           generatedAddress={generatedAddress}
+          generatedViaRelay={generatedViaRelay}
           grantRemoved={grantStatus === 'removed'}
           linkExpiry={linkExpiry}
           onIntentChange={updateIntent}

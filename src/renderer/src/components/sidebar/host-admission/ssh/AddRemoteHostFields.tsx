@@ -6,9 +6,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useTranslate } from '@/i18n/use-translate'
 import {
   translateHostAccessLinkError,
-  translateRemotePairingEndpointKind
+  translateRemotePairingEndpointKind,
+  translateRemotePairingRelayRoute
 } from '@/lib/remote-pairing/remote-pairing-copy'
-import type { ParseHostAccessLinkResult } from '../../../../../../shared/remote-runtime/pairing/remote-pairing-address'
+import {
+  hostAccessLinkNeedsTunnel,
+  type ParseHostAccessLinkResult
+} from '../../../../../../shared/remote-runtime/pairing/remote-pairing-address'
 import {
   applyParsedSshHostInput,
   type EditingTarget
@@ -169,8 +173,8 @@ export function RemoteServerFields({
 }) {
   const t = useTranslate()
   const inputError = pairingCode.trim() !== '' && !parsedLink.ok
-  const loopbackBlocked =
-    parsedLink.ok && parsedLink.value.endpointKind === 'loopback' && !allowLoopback
+  const needsTunnel = parsedLink.ok && hostAccessLinkNeedsTunnel(parsedLink.value)
+  const loopbackBlocked = needsTunnel && !allowLoopback
   const pairingCodeDescriptionId = inputError
     ? 'add-server-pairing-code-error'
     : loopbackBlocked
@@ -233,12 +237,17 @@ export function RemoteServerFields({
         <div className="space-y-1 rounded-md border border-border/60 p-3">
           <div className="flex items-center gap-2 text-xs font-medium">
             {t('auto.components.sidebar.AddRemoteHostDialog.linkDestination', 'Link destination')}
-            <Badge variant="outline">
-              {translateRemotePairingEndpointKind(parsedLink.value.endpointKind, t)}
-            </Badge>
+            {needsTunnel || parsedLink.value.endpointKind !== 'loopback' ? (
+              <Badge variant="outline">
+                {translateRemotePairingEndpointKind(parsedLink.value.endpointKind, t)}
+              </Badge>
+            ) : null}
+            {parsedLink.value.viaRelay ? (
+              <Badge variant="outline">{translateRemotePairingRelayRoute(t)}</Badge>
+            ) : null}
           </div>
           <div className="font-mono text-sm">{parsedLink.value.displayEndpoint}</div>
-          {parsedLink.value.endpointKind === 'loopback' ? (
+          {needsTunnel ? (
             <label className="mt-2 flex items-start gap-2 text-xs">
               <Checkbox
                 checked={allowLoopback}

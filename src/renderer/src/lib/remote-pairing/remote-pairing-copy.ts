@@ -57,6 +57,10 @@ export function translateRemotePairingEndpointKind(
   }
 }
 
+export function translateRemotePairingRelayRoute(t: Translate = translate): string {
+  return t('auto.lib.remotePairingCopy.relay', 'Orca Relay')
+}
+
 export function translateRemotePairingFailureDescription(
   kind: RemotePairingFailureKind,
   endpoint: string | null,
