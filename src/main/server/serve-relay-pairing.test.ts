@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { parsePairingCode } from '../../shared/remote-runtime/pairing/pairing'
 import { OrchestrationDb } from '../runtime/orchestration/db/orchestration-db'
 import { OrcaRuntimeService } from '../runtime/orca-runtime'
@@ -14,6 +14,8 @@ vi.mock('../runtime/mobile-cloud-relay/authentication/relay-account-failure', ()
   readRelayAccountFailure: async () => null
 }))
 
+const NOW = Date.UTC(2026, 0, 1)
+
 const relay = {
   v: 1 as const,
   directorUrl: 'https://relay.example.com',
@@ -21,7 +23,7 @@ const relay = {
   assignmentEpoch: 7,
   relayHostId: 'AbCdEf0123_-xyZ9',
   inviteToken: 'A'.repeat(43),
-  inviteExpiresAt: Date.now() + RUNTIME_RELAY_PAIRING_OFFER_TTL_MS,
+  inviteExpiresAt: NOW + RUNTIME_RELAY_PAIRING_OFFER_TTL_MS,
   e2eeFraming: 2 as const
 }
 
@@ -65,6 +67,16 @@ async function withServer(
 
 const args = { address: '100.64.1.20', name: 'CLI', grants: [] }
 
+beforeEach(() => {
+  // Why frozen Date only: the real server runs on real timers while grant expiries read a fixed clock.
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(NOW)
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
 describe('orca serve --relay pairing', () => {
   it('mints the Relay link on its own 10-minute grant, never the direct one', async () => {
     const provider = relayProvider(async (relayDeviceId) => ({
@@ -77,7 +89,6 @@ describe('orca serve --relay pairing', () => {
       }
     }))
     await withServer(provider, async (server) => {
-      const before = Date.now()
       const offer = await createServeRelayPairingOffer(server, args)
       if (!offer.available || !offer.relay.available) {
         throw new Error('expected a serve Relay pairing offer')
@@ -89,12 +100,7 @@ describe('orca serve --relay pairing', () => {
       const registry = server.getDeviceRegistry()
       expect(registry?.getDevice(offer.deviceId)?.offerExpiresAt).toBeUndefined()
       const relayGrant = registry?.getDevice(relayed!.pairedDeviceId!)
-      expect(relayGrant?.offerExpiresAt).toBeGreaterThanOrEqual(
-        before + RUNTIME_RELAY_PAIRING_OFFER_TTL_MS
-      )
-      expect(relayGrant?.offerExpiresAt).toBeLessThanOrEqual(
-        Date.now() + RUNTIME_RELAY_PAIRING_OFFER_TTL_MS
-      )
+      expect(relayGrant?.offerExpiresAt).toBe(NOW + RUNTIME_RELAY_PAIRING_OFFER_TTL_MS)
     })
   })
 
