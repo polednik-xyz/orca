@@ -8,6 +8,7 @@ import {
   requestMobilePairingOffer,
   requestRuntimePairingOffer
 } from '../runtime/rpc/server/pairing/pairing-offer-requests'
+import { createRuntimeRelayPairingUrl } from '../runtime/rpc/server/pairing/runtime-relay-share'
 import {
   getPairingNetworkInterfaces,
   type DefaultRouteInterfaceLookup,
@@ -152,6 +153,10 @@ export function registerMobileHandlers(
         expiresAt: offer.offerExpiresAt
       }
     }
+  )
+
+  ipcMain.handle('mobile:getRuntimeRelayPairingUrl', () =>
+    createRuntimeRelayPairingUrl(rpcServer, getDefaultRouteInterfaceNames)
   )
 
   ipcMain.handle('mobile:listDevices', () => {

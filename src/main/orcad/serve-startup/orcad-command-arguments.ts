@@ -25,6 +25,8 @@ Options:
                            would accept them.
   --json                   Print the one-line server readiness JSON to stdout.
   --no-pairing             Do not create a client pairing offer at startup.
+  --relay                  Also print a runtime pairing link through Orca Relay;
+                           needs this profile signed in with Relay access.
   --mobile-pairing         Create a mobile-scoped pairing offer with a QR code.
   --grant-desktop-control  Allow desktop control in the default runtime offer;
                            cannot combine with --no-pairing or --mobile-pairing.
@@ -68,6 +70,8 @@ export function parseArgs(argv: string[]): OrcadCommandArguments {
       options.noPairing = true
     } else if (arg === '--mobile-pairing') {
       options.mobilePairing = true
+    } else if (arg === '--relay') {
+      options.relay = true
     } else if (arg === '--grant-desktop-control') {
       options.grantDesktopControl = true
     } else if (arg === '--recipe-json') {
@@ -108,6 +112,7 @@ export function parseArgs(argv: string[]): OrcadCommandArguments {
     bind: options.bind,
     noPairing: options.noPairing === true,
     mobilePairing: options.mobilePairing === true,
+    relay: options.relay,
     grantDesktopControl: options.grantDesktopControl,
     allowPublic: options.allowPublic,
     refusePublic: options.refusePublic,

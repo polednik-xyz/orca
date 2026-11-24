@@ -59,14 +59,15 @@ export class RuntimeRpcMobileDevices extends RuntimeRpcRequestAdmission {
     for (const device of plan) {
       const { deviceId } = device
       // Keep ancestors until child cleanup is durable so retry can rediscover them.
+      // Runtime grants can carry a Relay binding too; its cloud credential must not outlive the grant.
+      if (device.relayBinding && !this.queueRelayDeviceRevoke(device.relayBinding)) {
+        return false
+      }
       if (device.scope === 'mobile') {
-        if (device.relayBinding && !this.queueRelayDeviceRevoke(device.relayBinding)) {
-          return false
-        }
         this.queuePushUnregister(deviceId, device.pushRegistration?.registrationId)
       }
       registry.removeDevice(deviceId)
-      if (device.scope === 'mobile') {
+      if (device.scope === 'mobile' || device.relayBinding) {
         this.mobileRelayPairingProvider?.onDemandStateChanged?.()
       }
       this.runtime.forgetClientNavigationState(deviceId)

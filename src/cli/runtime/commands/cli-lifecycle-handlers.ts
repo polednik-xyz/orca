@@ -113,6 +113,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
     const projectRoot = typeof projectRootValue === 'string' ? projectRootValue : null
     const noPairing = flags.get('no-pairing') === true
     const mobilePairing = flags.get('mobile-pairing') === true
+    const relay = flags.get('relay') === true
     const grantDesktopControl = flags.get('grant-desktop-control') === true
     const allowPublic = flags.get('allow-public') === true
     const refusePublic = flags.get('refuse-public') === true
@@ -128,6 +129,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       bind,
       noPairing,
       mobilePairing,
+      relay,
       grantDesktopControl,
       allowPublic,
       refusePublic,
@@ -147,6 +149,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       pairingAddress: typeof pairingAddressValue === 'string' ? pairingAddressValue : null,
       noPairing,
       mobilePairing,
+      relay,
       grantDesktopControl,
       recipeJson,
       projectRoot,

@@ -3,6 +3,7 @@ import type { MobileRelayStatusDetail } from '../../../shared/remote-runtime/rel
 import type { MobilePairingConnectionMode } from '../../../shared/remote-runtime/pairing/mobile-pairing-connection-mode'
 import type { RuntimePairingReach } from '../../../shared/remote-runtime/pairing/runtime-pairing-reach'
 import type { MobileRelayMintFailure } from '../../../shared/remote-runtime/relay/mobile-relay-mint-failure'
+import type { RuntimeRelayPairingUrlResult } from '../../../shared/remote-runtime/host-catalog/runtime-access-grants'
 import type { PreloadApi } from '../../api-types'
 
 export const mobileApi = {
@@ -57,6 +58,9 @@ export const mobileApi = {
         expiresAt: number | null
       }
   > => ipcRenderer.invoke('mobile:getRuntimePairingUrl', args),
+
+  getRuntimeRelayPairingUrl: (): Promise<RuntimeRelayPairingUrlResult> =>
+    ipcRenderer.invoke('mobile:getRuntimeRelayPairingUrl'),
 
   listDevices: (): Promise<{
     devices: {

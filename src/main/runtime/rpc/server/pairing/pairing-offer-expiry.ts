@@ -11,6 +11,8 @@ import type { RuntimeDeviceGrant } from '../../callers/rpc-method-permission'
 // Desktop UI offers only; headless serve passes no TTL so its offers never expire.
 export const MOBILE_PAIRING_OFFER_TTL_MS = 10 * 60_000
 export const RUNTIME_PAIRING_OFFER_TTL_MS = 60 * 60_000
+// Matches the single-use Orca Relay invite, so the grant cannot outlive the link that carries it.
+export const RUNTIME_RELAY_PAIRING_OFFER_TTL_MS = 10 * 60_000
 // A phone mid-scan keeps the old offer while re-advertisement mints a fresh one.
 export const PAIRING_OFFER_REUSE_MARGIN_MS = 60_000
 
