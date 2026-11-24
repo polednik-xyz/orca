@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 # Rebuilds the personal Orca: latest upstream main + the feature branches below, then the Windows installer.
-$features = @('origin/feat/project-groups-dnd', 'origin/feat/project-group-nesting')
+$features = @('origin/feat/project-groups-dnd', 'origin/feat/project-group-nesting', 'origin/feat/project-group-appearance', 'origin/feat/relay-runtime-pairing-port')
 
 Set-Location (Join-Path $PSScriptRoot '..')
 # VsDevCmd needs vswhere on PATH, or it reports VSCMD_VER=17.0 and Orca's native build rejects the toolchain.
