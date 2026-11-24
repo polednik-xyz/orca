@@ -35,6 +35,15 @@ export const ProjectGroupUpdateArgs = z.object({
     icon: z
       .unknown()
       .transform((value) => sanitizeRepoIcon(value))
+      .optional(),
+    remoteMembers: z
+      .array(
+        z.object({
+          hostId: z.string().min(1),
+          projectId: z.string().min(1),
+          order: z.number().finite().optional()
+        })
+      )
       .optional()
   })
 })
