@@ -13,6 +13,8 @@ export type ProjectGroup = {
   executionHostId?: string | null
   parentGroupId: string | null
   createdFrom: ProjectGroupCreatedFrom
+  /** Projects from other computers placed here by this client; never written to their host. */
+  remoteMembers?: ProjectGroupRemoteMember[]
   tabOrder: number
   rootProjectOrder?: number
   isCollapsed: boolean
@@ -22,8 +24,13 @@ export type ProjectGroup = {
   updatedAt: number
 }
 
+export type ProjectGroupRemoteMember = { hostId: string; projectId: string; order?: number }
+
 export type ProjectGroupUpdate = Partial<
-  Pick<ProjectGroup, 'name' | 'isCollapsed' | 'tabOrder' | 'color' | 'icon' | 'hookSettings'>
+  Pick<
+    ProjectGroup,
+    'name' | 'isCollapsed' | 'tabOrder' | 'color' | 'icon' | 'hookSettings' | 'remoteMembers'
+  >
 > & { rootProjectOrder?: number | null; parentGroupId?: string | null }
 
 export type ProjectGroupMutation = { groupId: string; updates: ProjectGroupUpdate }

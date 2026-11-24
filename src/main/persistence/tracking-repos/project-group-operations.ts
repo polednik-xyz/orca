@@ -14,6 +14,7 @@ import {
 } from '../../../shared/project/groups/project-groups'
 import { canMoveProjectGroup } from '../../../shared/project/groups/project-group-nesting'
 import { sanitizeRepoIcon } from '../../../shared/repository/appearance/repo-icon'
+import { normalizeProjectGroupRemoteMembers } from '../../../shared/project/groups/project-group-remote-members'
 import { getNextRootProjectOrder } from '../../../shared/sidebar-list/sections/root-project-order'
 import { folderWorkspaceKey } from '../../../shared/workspace/identity/workspace-scope'
 import { removeWorkspaceSessionOwnersEverywhere } from '../restoring-sessions/session-owner-removal'
@@ -218,6 +219,14 @@ export class ProjectGroupPersistenceOperations {
     }
     if (updates.hookSettings !== undefined) {
       group.hookSettings = updates.hookSettings
+    }
+    if (updates.remoteMembers !== undefined) {
+      const remoteMembers = normalizeProjectGroupRemoteMembers(updates.remoteMembers)
+      if (remoteMembers.length > 0) {
+        group.remoteMembers = remoteMembers
+      } else {
+        delete group.remoteMembers
+      }
     }
     group.updatedAt = Date.now()
   }

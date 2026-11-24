@@ -1,5 +1,6 @@
 import React from 'react'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
+import { RepoMark } from '@/components/repo/RepoMark'
 import type { GroupHeaderRow } from '../../../../../../shared/sidebar-list/row-types'
 import { resolveRepoHeaderColor } from './project-header-color'
 
@@ -15,14 +16,13 @@ export function SectionHeaderGlyph({
   isGroupHeader: boolean
   fallback: React.ComponentType<{ className?: string }>
 }): React.JSX.Element {
+  if (row.repo && repoColor) {
+    // Same resolved mark as the workspace cards, so auto colors and clash boxes match.
+    return <RepoMark repo={row.repo} size="md" />
+  }
   if (row.repo) {
     return (
-      <RepoIconGlyph
-        repoIcon={row.repo.repoIcon}
-        color={repoColor}
-        className="size-4"
-        iconClassName="size-3.5"
-      />
+      <RepoIconGlyph repoIcon={row.repo.repoIcon} className="size-4" iconClassName="size-3.5" />
     )
   }
   const group =
