@@ -15,7 +15,10 @@ export async function buildServePairingReadiness(
   },
   rpc: Pick<
     OrcaRuntimeRpcServer,
-    'getWebSocketEndpoint' | 'createPairingOffer' | 'createRuntimeRelayPairingOffer'
+    | 'getWebSocketEndpoint'
+    | 'createPairingOffer'
+    | 'createRuntimeRelayPairingOffer'
+    | 'revokeRuntimeAccess'
   >
 ): Promise<Pick<ServeReadiness, 'boundEndpoint' | 'advertisedEndpoint' | 'pairing'>> {
   const boundEndpoint = rpc.getWebSocketEndpoint()

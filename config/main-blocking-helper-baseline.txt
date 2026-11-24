@@ -672,6 +672,8 @@
 1 src/main/ipc/runtime-environments/managed-orcad/orcad-runtime-lifecycle-handlers.ts
 1 src/main/ipc/runtime-environments/managed-orcad/runtime-environment-recipe-vm-wake.ts
 1 src/main/ipc/runtime-environments/mobile-relay/runtime-environment-mobile-relay-hosts.ts
+1 src/main/ipc/runtime-environments/relay-route/runtime-relay-direct-upstream.ts # one v2-latch read per direct dial, the same call remote-runtime-request-socket.ts makes
+2 src/main/ipc/runtime-environments/relay-route/runtime-relay-route-store.ts # small capped sidecar, memoized, written only at pairing or credential renewal; async needs a new shared secure-write helper and async bridge route callbacks
 1 src/main/ipc/runtime-environments/runtime-environments.ts
 2 src/main/ipc/session.ts
 3 src/main/ipc/settings/settings.ts
@@ -1145,6 +1147,7 @@
 1 src/main/runtime/integrations/git/runtime-git-command-target.ts
 3 src/main/runtime/integrations/git/runtime-git-generation-commands.ts
 1 src/main/runtime/integrations/linear/runtime-linear-connection-commands.ts
+1 src/main/runtime/mobile-cloud-relay/authentication/relay-account-failure.ts # one profile read per share or serve start, as desktop-relay-service.ts reads readRelayAuthContext
 2 src/main/runtime/mobile-cloud-relay/authentication/relay-auth-context.ts
 1 src/main/runtime/mobile-cloud-relay/desktop-relay-service.ts
 2 src/main/runtime/mobile-cloud-relay/pairing/relay-revoke-outbox.ts

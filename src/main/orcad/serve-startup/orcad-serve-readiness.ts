@@ -9,7 +9,10 @@ export async function buildOrcadServeReadiness(input: {
   runtimeId: string
   rpc: Pick<
     OrcaRuntimeRpcServer,
-    'getWebSocketEndpoint' | 'createPairingOffer' | 'createRuntimeRelayPairingOffer'
+    | 'getWebSocketEndpoint'
+    | 'createPairingOffer'
+    | 'createRuntimeRelayPairingOffer'
+    | 'revokeRuntimeAccess'
   >
   collectHealth: () => Promise<OrcadHealth>
 }): Promise<ServeReadiness> {

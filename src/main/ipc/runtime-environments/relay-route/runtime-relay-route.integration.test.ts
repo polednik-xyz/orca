@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { connect, createServer as createTcpServer, type AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WebSocketServer, type RawData, type WebSocket } from 'ws'
 import type { DeviceCredentialInstalled } from '../../../../shared/remote-runtime/relay/mobile-relay-credential-contract'
 import { parsePairingCode } from '../../../../shared/remote-runtime/pairing/pairing'
@@ -25,16 +25,24 @@ import {
 import type { RuntimeRelayRoute } from './runtime-relay-route-store'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+const NOW = Date.UTC(2026, 0, 1)
 const INVITE_TOKEN = 'I'.repeat(43)
 
 type Harness = Awaited<ReturnType<typeof startHarness>>
 
 const cleanups: (() => Promise<void> | void)[] = []
 
+beforeEach(() => {
+  // Why Date only, advancing: real sockets and timers carry the flow, expiries start from a fixed clock.
+  vi.useFakeTimers({ toFake: ['Date'], shouldAdvanceTime: true })
+  vi.setSystemTime(NOW)
+})
+
 afterEach(async () => {
   for (const cleanup of cleanups.splice(0).toReversed()) {
     await cleanup()
   }
+  vi.useRealTimers()
 })
 
 function forward(target: WebSocket, raw: RawData, isBinary: boolean): void {
@@ -323,7 +331,8 @@ function statusThrough(pairing: PairingOffer) {
   )
 }
 
-describe('runtime pairing through Orca Relay', () => {
+// Why: each case pairs over real loopback sockets and E2EE through a fake director and cell.
+describe('runtime pairing through Orca Relay', { timeout: 30_000 }, () => {
   it('pairs from a Relay link, installs a credential only this client holds, and serves the client stack', async () => {
     const harness = await startHarness({ cellHonorsRevoke: true })
     const { paired, pairing } = await pairAndBridge(harness)
@@ -335,7 +344,7 @@ describe('runtime pairing through Orca Relay', () => {
       ok: true,
       result: { deviceScope: 'runtime' }
     })
-  }, 30_000)
+  })
 
   it('reports a grant the server revoked as unauthorized through Relay', async () => {
     const harness = await startHarness({ cellHonorsRevoke: false })
@@ -346,7 +355,7 @@ describe('runtime pairing through Orca Relay', () => {
 
     expect(harness.revokedDevices.has(harness.offer.deviceId)).toBe(true)
     await expect(statusThrough(pairing)).rejects.toMatchObject({ code: 'unauthorized' })
-  }, 30_000)
+  })
 
   it('reports a revoked cloud credential as unauthorized once the director refuses it', async () => {
     const harness = await startHarness({ cellHonorsRevoke: true })
@@ -355,7 +364,7 @@ describe('runtime pairing through Orca Relay', () => {
     expect(harness.server.revokeRuntimeAccess(harness.offer.deviceId)).toBe(true)
 
     await expect(statusThrough(pairing)).rejects.toMatchObject({ code: 'unauthorized' })
-  }, 30_000)
+  })
 
   it('uses the paired endpoint when it answers and Relay only when it does not', async () => {
     const harness = await startHarness({ cellHonorsRevoke: true })
@@ -371,7 +380,7 @@ describe('runtime pairing through Orca Relay', () => {
     await expect(statusThrough(unreachable.pairing)).resolves.toMatchObject({ ok: true })
     expect(harness.state.clientConnections).toBeGreaterThan(relayDialsAfterPairing)
     expect(unreachable.bridge.activeRoute).toBe('relay')
-  }, 30_000)
+  })
 
   it('falls back to Relay and stays there when the paired address reaches a different Orca server', async () => {
     const harness = await startHarness({ cellHonorsRevoke: true })
@@ -386,7 +395,7 @@ describe('runtime pairing through Orca Relay', () => {
     // Why: after a direct miss the bridge prefers Relay instead of retrying the foreign address.
     expect(foreign.dials).toBe(foreignDialsAfterMiss)
     expect(bridge.activeRoute).toBe('relay')
-  }, 30_000)
+  })
 
   it('still reports a grant the paired server revoked as unauthorized on the direct route', async () => {
     const harness = await startHarness({ cellHonorsRevoke: false })
@@ -396,7 +405,7 @@ describe('runtime pairing through Orca Relay', () => {
     expect(harness.server.revokeRuntimeAccess(harness.offer.deviceId)).toBe(true)
 
     await expect(statusThrough(pairing)).rejects.toMatchObject({ code: 'unauthorized' })
-  }, 30_000)
+  })
 
   it('reports a spent invite as an invalid link instead of an unreachable server', async () => {
     const harness = await startHarness({ cellHonorsRevoke: true })
@@ -407,5 +416,5 @@ describe('runtime pairing through Orca Relay', () => {
         connectUrl: harness.connectUrl
       })
     ).resolves.toMatchObject({ ok: false, kind: 'access-link-invalid' })
-  }, 30_000)
+  })
 })

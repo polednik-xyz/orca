@@ -15,7 +15,8 @@ A port of stablyai/orca#25492 onto the current main structure. It lets a desktop
   - `relay_not_entitled`
   - `relay_cloud_unconfigured`
   - otherwise, the error code from creating the link.
-- If creating the Relay link fails, the grant minted for it is revoked.
+  - The Relay URL rides on its own runtime grant, separate from the direct URL's grant, and that grant expires with the 10-minute invite. Why: stripping `relay` from a leaked Relay link must not leave a direct link that never expires. The direct URL is unchanged and does not expire.
+- On both paths (desktop and serve), a Relay link is only ever minted on a grant of its own, which expires after 10 minutes. If the sign-in check fails, no Relay grant is created. If creating the link fails, its grant is revoked. On the desktop no link is handed out; serve still prints the direct URL.
 - Minting a newer link revokes the unused invite of an older grant.
 - `pairing.getEndpoints` and `pairing.provisionRelay` answer only runtime grants that were minted with a Relay invite (`relayBinding`). Direct-only grants get `relay: null` or `relay_disabled_for_device`.
 
@@ -61,7 +62,7 @@ A port of stablyai/orca#25492 onto the current main structure. It lets a desktop
 
 All of these guard security or protocol invariants:
 
-- **Host side:** the invite is bound to its grant, revoke on link failure, revoking a grant queues its cloud revoke, a newer link revokes the older invite, and runtime-grant gating in `DesktopRelayService`. The 10-minute TTL is a constant and is not tested.
+- **Host side:** the invite is bound to its grant, revoke on link failure, revoking a grant queues its cloud revoke, a newer link revokes the older invite, and runtime-grant gating in `DesktopRelayService`. For serve: the Relay link gets its own grant with the 10-minute TTL, and a failed mint leaves only the direct grant (`src/main/server/serve-relay-pairing.test.ts`).
 - **Client side:**
   - the route store binding;
   - the host-id/key mismatch refused before dialing;
@@ -76,3 +77,5 @@ Dropped as not security-relevant: the cell-move, renewal and dropped-client inte
 - These stay direct-only: the web client, a browser-hosted client, the WSL sites and the ephemeral-VM probe.
 - After a ticket exchange over Relay, the old token stays valid until the first bridge sign-in.
 - The route label (Relay or direct) updates only when status is published.
+- A successful Relay v2 authentication does not latch the host key, so the direct leg (`runtime-relay-direct-upstream.ts`) dials legacy framing until a direct v2 dial latches it. Why: a Relay-leg v2 auth doesn't prove that the direct listener speaks v2, and a wrong latch would turn later direct refusals into auth failures.
+- Serve does not rotate older pending runtime offers, so the direct link stays the same across restarts. A restart within the invite window may reuse the still-valid Relay grant.

@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { parsePairingCode } from '../../../../shared/remote-runtime/pairing/pairing'
 import { OrchestrationDb } from '../../orchestration/db/orchestration-db'
 import { OrcaRuntimeService } from '../../orca-runtime'
@@ -9,6 +9,7 @@ import { OrcaRuntimeRpcServer } from './runtime-rpc'
 import type { MobileRelayPairingProvider } from './runtime-rpc-pairing-types'
 
 const ownerIdentityKey = 'user\0profile\0org'
+const NOW = Date.UTC(2026, 0, 1)
 const relay = {
   v: 1 as const,
   directorUrl: 'https://relay.example.com',
@@ -16,7 +17,7 @@ const relay = {
   assignmentEpoch: 7,
   relayHostId: 'AbCdEf0123_-xyZ9',
   inviteToken: 'A'.repeat(43),
-  inviteExpiresAt: Date.now() + 60_000,
+  inviteExpiresAt: NOW + 60_000,
   e2eeFraming: 2 as const
 }
 
@@ -74,6 +75,16 @@ async function relayOffer(server: OrcaRuntimeRpcServer) {
   }
   return { ...offer, relay: offer.relay }
 }
+
+beforeEach(() => {
+  // Why advancing: the real server runs on real timers; only the expiry clock is pinned.
+  vi.useFakeTimers({ toFake: ['Date'], shouldAdvanceTime: true })
+  vi.setSystemTime(NOW)
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('runtime-scoped Relay pairing', () => {
   it('binds the Relay invite to the same grant while the direct link stays Relay-free', async () => {
