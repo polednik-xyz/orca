@@ -1,4 +1,5 @@
 import WebSocket from 'ws'
+import { withRemoteRuntimeSocketConnector } from '../remote-runtime-socket-connector'
 import type { PairedRuntimeConnection } from '../pairing/paired-runtime-connection'
 import type { PairedE2EEClientHandshake } from '../e2ee/paired-e2ee-client-handshake'
 import { createRemoteRuntimeClientHandshake } from '../remote-runtime-client-framing'
@@ -111,9 +112,12 @@ function createSocket(
       // Why: no runtime frame exceeds this, so a larger one is a broken peer, not a payload to buffer.
       ws: new WebSocket(
         connection.endpoint,
-        remoteRuntimeConnectOptions(
-          { maxPayload: REMOTE_RUNTIME_MAX_WEBSOCKET_FRAME_BYTES },
-          connectTimeoutMs
+        withRemoteRuntimeSocketConnector(
+          connection.endpoint,
+          remoteRuntimeConnectOptions(
+            { maxPayload: REMOTE_RUNTIME_MAX_WEBSOCKET_FRAME_BYTES },
+            connectTimeoutMs
+          )
         )
       ),
       handshake

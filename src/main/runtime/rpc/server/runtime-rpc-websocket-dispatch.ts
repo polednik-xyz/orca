@@ -270,11 +270,11 @@ export class RuntimeRpcWebSocketDispatch extends RuntimeRpcMobileDevices {
         callerScope,
         clientCapabilities: authenticatedSocket?.clientCapabilities,
         capabilitySource: authenticatedSocket?.capabilitySource,
+        // Host refuses v2 token capabilities over Relay, so Relay runtime clients declare them here.
         updateClientCapabilities:
-          authenticatedSocket && device.scope === 'mobile'
-            ? (clientCapabilities) => {
-                authenticatedSocket.clientCapabilities = clientCapabilities
-              }
+          authenticatedSocket &&
+          (device.scope === 'mobile' || authenticatedSocket.transport.transport === 'relay')
+            ? (clientCapabilities) => Object.assign(authenticatedSocket, { clientCapabilities })
             : undefined,
         pairing: pairingContext,
         deviceSelf:

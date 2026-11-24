@@ -3,10 +3,7 @@ import { sendRemoteRuntimeRequestOnSocket } from '../../../../shared/remote-runt
 import '../../../../shared/remote-runtime/protocol/protocol-version'
 import { REMOTE_RUNTIME_SHARED_CONTROL_CAPABILITY } from '../../../../shared/remote-runtime/protocol/host-runtime-capabilities'
 import { ELECTRON_REMOTE_RUNTIME_CLIENT_CAPABILITIES } from '../../../../shared/remote-runtime/protocol/electron-remote-runtime-client-capabilities'
-import {
-  getPreferredPairedRuntimeConnection,
-  type KnownRuntimeEnvironment
-} from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
+import type { KnownRuntimeEnvironment } from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
 import { managedOrcadRefusalNeedingUserCode } from '../../../managed-server/lifecycle/orcad-managed-tunnel-identity'
 import { recoverRefusedPairing } from '../pairing/runtime-environment-pairing-refusal-registry'
 import { recordRuntimeEnvironmentUsage } from '../../../../shared/remote-runtime/host-store/runtime-environment-usage-record'
@@ -34,6 +31,10 @@ import {
   RUNTIME_ENVIRONMENT_ASLEEP_ERROR_CODE,
   RUNTIME_ENVIRONMENT_ASLEEP_MESSAGE
 } from '../../../../shared/remote-runtime/recipe-vm-wake'
+import {
+  getRuntimeEnvironmentDialConnection,
+  withRuntimeEnvironmentRoute
+} from '../relay-route/runtime-relay-route'
 
 const statusListeners = new Set<(snapshot: RuntimeHostStatusSnapshot) => void>()
 
@@ -79,7 +80,7 @@ export function createRuntimeEnvironmentStatusOwner(
     pause: () => void
   }
 ): RuntimeHostStatusOwner {
-  const connection = getPreferredPairedRuntimeConnection(environment)
+  const connection = getRuntimeEnvironmentDialConnection(userDataPath, environment)
   let evidence = captureRuntimeEnvironmentCapabilityEvidence(environment.id, connection)
   const probe = async (signal: AbortSignal): Promise<RuntimeHostStatusResponse> => {
     const incarnation = getRuntimeEnvironmentCapabilityIncarnation(environment.id)
@@ -184,7 +185,10 @@ export function createRuntimeEnvironmentStatusOwner(
       return capable && active
     },
     publish: (snapshot) => {
-      getRuntimeDesktopSurface().sendToRenderers?.(RUNTIME_HOST_STATUS_CHANNEL, snapshot)
+      getRuntimeDesktopSurface().sendToRenderers?.(
+        RUNTIME_HOST_STATUS_CHANNEL,
+        withRuntimeEnvironmentRoute(snapshot)
+      )
       for (const listener of statusListeners) {
         listener(snapshot)
       }

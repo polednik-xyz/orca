@@ -8,6 +8,8 @@ export type OrcadOptions = {
   pairingAddress?: string
   /** Request a mobile-scoped pairing offer and terminal QR. */
   mobilePairing?: boolean
+  /** Also mint a runtime pairing link that reaches this host through Orca Relay. */
+  relay?: boolean
   grantDesktopControl?: boolean
   /** Print only the ephemeral-VM recipe line. */
   recipeJson?: boolean

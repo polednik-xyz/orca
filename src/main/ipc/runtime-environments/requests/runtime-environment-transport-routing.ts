@@ -28,6 +28,7 @@ import {
 import { shouldUseSharedControlEnvelope } from '../connections/runtime-environment-shared-control-envelope'
 import { sendEnvelopedOneShotCall } from './runtime-environment-runtime-pinned-send'
 import { resumeAfterIdleStop } from './runtime-environment-idle-stop-resume'
+import { getRuntimeEnvironmentDialConnection } from '../relay-route/runtime-relay-route'
 
 const DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS = 15_000
 
@@ -107,8 +108,11 @@ export async function callRuntimeEnvironment(
             return prepared.failure
           }
           const { environment: currentEnvironment, expected } = prepared
-          const pairedConnection = getPreferredPairedRuntimeConnection(currentEnvironment)
-          endpoint = pairedConnection.endpoint
+          const pairedConnection = getRuntimeEnvironmentDialConnection(
+            userDataPath,
+            currentEnvironment
+          )
+          endpoint = getPreferredPairedRuntimeConnection(currentEnvironment).endpoint
           const effectiveTimeoutMs = timeoutMs ?? DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS
           const sharedControlEnvelope = shouldUseSharedControlEnvelope(method, params, envelope)
           const call = {

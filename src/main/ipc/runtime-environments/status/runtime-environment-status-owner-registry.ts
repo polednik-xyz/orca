@@ -1,14 +1,15 @@
 import { resolveEnvironment } from '../../../../shared/remote-runtime/host-store/runtime-environment-store'
-import {
-  getPreferredPairedRuntimeConnection,
-  type KnownRuntimeEnvironment
-} from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
+import type { KnownRuntimeEnvironment } from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
 import type { RuntimeHostStatusOwner } from '../../../../shared/remote-runtime/host-status/runtime-host-status-owner'
 import type { RuntimeStatus } from '../../../../shared/remote-runtime/session-graph/runtime-session-contracts'
 import { runtimeEnvironmentConnectionPairingKey as getPairingKey } from '../connections/runtime-environment-capability-evidence'
 import { createRuntimeEnvironmentStatusOwner } from './runtime-environment-status-owner'
 import { isRuntimeEnvironmentManuallyDisconnected } from '../connectivity/runtime-environment-manual-disconnect'
 import type * as Transports from '../connections/runtime-environment-request-connections'
+import {
+  getRuntimeEnvironmentDialConnection,
+  withRuntimeEnvironmentRoute
+} from '../relay-route/runtime-relay-route'
 
 type RegistryTransports = Pick<
   typeof Transports,
@@ -43,7 +44,7 @@ export function createRuntimeEnvironmentStatusOwnerRegistry({
     consume: (environment: KnownRuntimeEnvironment, owner: RuntimeHostStatusOwner) => T
   ): Promise<T> {
     const environment = await resolveEnvironment(userDataPath, selector)
-    const pairedConnection = getPreferredPairedRuntimeConnection(environment)
+    const pairedConnection = getRuntimeEnvironmentDialConnection(userDataPath, environment)
     const key = `${userDataPath}\0${environment.pairingRevision ?? environment.createdAt}\0${getPairingKey(pairedConnection)}`
     let cached = statusOwners.get(environment.id)
     if (!cached || cached.key !== key || cached.owner.read().retired) {
@@ -84,11 +85,12 @@ export function createRuntimeEnvironmentStatusOwnerRegistry({
   }
 
   function getRuntimeEnvironmentStatusSnapshot(environmentId: string) {
-    return statusOwners.get(environmentId)?.owner.read() ?? null
+    const snapshot = statusOwners.get(environmentId)?.owner.read()
+    return snapshot ? withRuntimeEnvironmentRoute(snapshot) : null
   }
 
   function getRuntimeEnvironmentStatusSnapshots() {
-    return [...statusOwners.values()].map(({ owner }) => owner.read())
+    return [...statusOwners.values()].map(({ owner }) => withRuntimeEnvironmentRoute(owner.read()))
   }
 
   function getOwnedRuntimeEnvironmentStatusOwner(

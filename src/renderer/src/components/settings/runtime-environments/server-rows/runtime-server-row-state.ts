@@ -28,6 +28,8 @@ export type RuntimeServerRowState = {
   effectiveDetails: RuntimeHostDetails | undefined
   connectionState: RuntimeServerConnectionState
   isReachable: boolean
+  /** The path the live connection took; absent until the host has been reached. */
+  route?: 'direct' | 'relay'
   accessRevoked: boolean
   repairRoute: RuntimePairingRepairRoute
   /** What went wrong, in full; the row truncates it to one line. */
@@ -99,6 +101,7 @@ export function useRuntimeServerRowState(
     effectiveDetails,
     connectionState,
     isReachable,
+    route: snapshot?.route,
     accessRevoked,
     repairRoute,
     problem: accessRevoked

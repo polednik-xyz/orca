@@ -147,11 +147,7 @@ export class DesktopRelayService {
     context: MobilePairingConnectionContext,
     params: PairingGetEndpointsParams
   ): Promise<PairingGetEndpointsResult> {
-    this.requireMobileDevice(context.deviceId)
-    if (
-      this.runtimeRpc.getDeviceRegistry()?.getMobilePairingConnectionMode(context.deviceId) ===
-      'local-only'
-    ) {
+    if (!this.relayEnabledFor(context.deviceId)) {
       return { v: 1, relay: null }
     }
     return await this.withTransientDemand(`endpoints:${context.deviceId}`, async () => {
@@ -189,11 +185,7 @@ export class DesktopRelayService {
     context: MobilePairingConnectionContext,
     params: PairingProvisionRelayParams
   ): Promise<DeviceCredentialInstalled> {
-    this.requireMobileDevice(context.deviceId)
-    if (
-      this.runtimeRpc.getDeviceRegistry()?.getMobilePairingConnectionMode(context.deviceId) ===
-      'local-only'
-    ) {
+    if (!this.relayEnabledFor(context.deviceId)) {
       throw new Error('relay_disabled_for_device')
     }
     return await this.withTransientDemand(`provision:${context.deviceId}`, async () => {
@@ -208,7 +200,7 @@ export class DesktopRelayService {
         throw new Error('relay_provision_authorization_unavailable')
       }
       if (
-        !this.runtimeRpc.setMobileRelayBinding(context.deviceId, {
+        !this.runtimeRpc.setDeviceRelayBinding(context.deviceId, {
           relayHostId: broker.hostId,
           relayDeviceId: context.deviceId,
           ownerIdentityKey: broker.ownerIdentityKey
@@ -244,10 +236,17 @@ export class DesktopRelayService {
     }
   }
 
-  private requireMobileDevice(deviceId: string): void {
-    if (this.runtimeRpc.getDeviceRegistry()?.getDevice(deviceId)?.scope !== 'mobile') {
+  /** Phones unless paired LAN-only; runtime grants only when minted with a Relay invite. */
+  private relayEnabledFor(deviceId: string): boolean {
+    const registry = this.runtimeRpc.getDeviceRegistry()
+    const device = registry?.getDevice(deviceId)
+    if (!registry || !device) {
+      // Phones read this code over the wire, so it keeps its mobile-era name.
       throw new Error('mobile_device_not_found')
     }
+    return device.scope === 'mobile'
+      ? registry.getMobilePairingConnectionMode(deviceId) !== 'local-only'
+      : device.relayBinding !== undefined
   }
 
   private assertRelayHost(

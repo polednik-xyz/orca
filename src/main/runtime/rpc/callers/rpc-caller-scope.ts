@@ -21,6 +21,13 @@ const RUNTIME_PAIRED_STANDARD: ReadonlySet<RpcMethodPermission> = new Set([
   'device-self'
 ])
 
+// Relay credential methods act only on the calling device, and the host provisions only runtime
+// grants minted with a Relay invite (desktop-relay-service.ts), so they are device-self for runtime clients.
+const RUNTIME_PAIRED_OWN_RELAY_METHODS: ReadonlySet<string> = new Set([
+  'pairing.getEndpoints',
+  'pairing.provisionRelay'
+])
+
 /** Mobile checks unknown methods by name because older phones interpret forbidden as unsupported; other callers retain method_not_found. */
 export function denyRpcMethodForCaller(
   scope: RpcCallerScope,
@@ -35,7 +42,11 @@ export function denyRpcMethodForCaller(
       ? `Method '${methodName}' is not available to a phone connected through a paired desktop`
       : null
   }
-  if (scope.kind === 'owner' || permission === undefined) {
+  if (
+    scope.kind === 'owner' ||
+    permission === undefined ||
+    RUNTIME_PAIRED_OWN_RELAY_METHODS.has(methodName)
+  ) {
     return null
   }
   return !RUNTIME_PAIRED_STANDARD.has(permission) &&

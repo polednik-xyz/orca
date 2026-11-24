@@ -1,4 +1,5 @@
 import WebSocket from 'ws'
+import { withRemoteRuntimeSocketConnector } from '../remote-runtime-socket-connector'
 import { abortSignalReason, throwIfSignalAborted } from '../../concurrency/abort-signal-reason'
 import type { PairedRuntimeConnection } from '../pairing/paired-runtime-connection'
 import type { RuntimeCapability } from '../protocol/protocol-version'
@@ -230,9 +231,10 @@ export async function sendRemoteRuntimeRequestOnSocket<TResult>(
           return
         }
         try {
-          const connectOptions = remoteRuntimeConnectOptions({
-            maxPayload: REMOTE_RUNTIME_MAX_WEBSOCKET_FRAME_BYTES
-          })
+          const connectOptions = withRemoteRuntimeSocketConnector(
+            connection.endpoint,
+            remoteRuntimeConnectOptions({ maxPayload: REMOTE_RUNTIME_MAX_WEBSOCKET_FRAME_BYTES })
+          )
           ws = new WebSocket(connection.endpoint, connectOptions)
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error)

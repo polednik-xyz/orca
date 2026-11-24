@@ -43,8 +43,8 @@ export class RelayDemandLedger {
     const now = (this.options.now ?? Date.now)()
     return this.options.deviceRegistry.listDevices().some((device) => {
       const binding = device.relayBinding
+      // Runtime grants paired through Relay hold demand like phones do.
       if (
-        device.scope !== 'mobile' ||
         !binding ||
         binding.ownerIdentityKey !== ownerIdentityKey ||
         binding.relayHostId !== this.options.relayHostId

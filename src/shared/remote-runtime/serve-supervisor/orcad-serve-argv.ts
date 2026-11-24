@@ -6,6 +6,7 @@ export type ServeOrcaAppArgs = {
   pairingAddress?: string | null
   noPairing?: boolean
   mobilePairing?: boolean
+  relay?: boolean
   grantDesktopControl?: boolean
   allowPublic?: boolean
   refusePublic?: boolean
@@ -26,6 +27,7 @@ export function serveOptionArgs(args: ServeOrcaAppArgs, prefix: '--' | '--serve-
     ...(args.pairingAddress ? [`${prefix}pairing-address`, args.pairingAddress] : []),
     ...(args.noPairing ? [`${prefix}no-pairing`] : []),
     ...(args.mobilePairing ? [`${prefix}mobile-pairing`] : []),
+    ...(args.relay ? [`${prefix}relay`] : []),
     ...(args.grantDesktopControl ? [`${prefix}grant-desktop-control`] : []),
     ...(args.allowPublic ? [`${prefix}allow-public`] : []),
     ...(args.refusePublic ? [`${prefix}refuse-public`] : []),

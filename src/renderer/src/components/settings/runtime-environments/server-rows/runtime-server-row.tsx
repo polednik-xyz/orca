@@ -13,7 +13,10 @@ import { useIntlLocale, useTranslate } from '@/i18n/use-translate'
 import { cn } from '@/lib/class-names'
 import { LoadingSpinner } from '../../../ui/LoadingSpinner'
 import { Button } from '../../../ui/button'
-import type { RuntimeHostDetails } from '../catalog/runtime-environment-host-details'
+import {
+  getRuntimeServerRouteLabel,
+  type RuntimeHostDetails
+} from '../catalog/runtime-environment-host-details'
 import {
   formatRuntimeEndpointAddress,
   getRuntimeServerAvailableUpdateText,
@@ -142,6 +145,10 @@ export function RuntimeServerRow({
               ? 'recheck'
               : null
 
+  const endpoint =
+    environment.endpoints.find((entry) => entry.id === environment.preferredEndpointId)?.endpoint ??
+    environment.endpoints[0]?.endpoint ??
+    null
   const status: ServerRowStatus = getRuntimeServerStatusIndicator(
     {
       connectionState: row.connectionState,
@@ -151,15 +158,12 @@ export function RuntimeServerRow({
       connecting,
       disconnecting,
       remoteUpdate,
-      managedNotRunning: Boolean(managed?.status && !managed.status.activeVersion)
+      managedNotRunning: Boolean(managed?.status && !managed.status.activeVersion),
+      routeLabel: row.isReachable ? getRuntimeServerRouteLabel(row.route, endpoint, t) : null
     },
     t
   )
 
-  const endpoint =
-    environment.endpoints.find((entry) => entry.id === environment.preferredEndpointId)?.endpoint ??
-    environment.endpoints[0]?.endpoint ??
-    null
   const sshRoute = getRuntimeServerRoute(environment, sshTargets, t)
   const address = formatRuntimeEndpointAddress(endpoint ?? undefined)
   const problemLine = getRuntimeServerProblemLine(

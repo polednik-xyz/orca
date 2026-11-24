@@ -16,6 +16,7 @@ import {
 import { TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '../../../../../../shared/work-items/task-source-runtime-capabilities'
 import type { RuntimeStatus } from '../../../../../../shared/remote-runtime/session-graph/runtime-session-contracts'
 import '@/runtime/hosts/connections/runtime-host-connection-state'
+import { classifyRemotePairingHostname } from '../../../../../../shared/remote-runtime/pairing/remote-pairing-address'
 import {
   runtimeHostConnectionState,
   type RuntimeHostConnectionState as RuntimeServerConnectionState
@@ -208,6 +209,36 @@ export function getRuntimeServerConnectionState(
     // Ready details prove only transport; older/failed probes can omit runtime status, and errors need reachability diagnostics.
     transportStatus: details.status === 'ready' ? 'connected' : 'disconnected'
   })
+}
+
+/** Names the path a connected server took: Relay, or direct by the kind of address it dialed. */
+export function getRuntimeServerRouteLabel(
+  route: 'direct' | 'relay' | undefined,
+  endpoint: string | null,
+  t: Translate = translate
+): string | null {
+  if (route === 'relay') {
+    return t('auto.components.settings.RuntimeEnvironmentsPane.routeRelay', 'Orca Relay')
+  }
+  if (route !== 'direct') {
+    return null
+  }
+  let kind: ReturnType<typeof classifyRemotePairingHostname> | null = null
+  try {
+    kind = endpoint ? classifyRemotePairingHostname(new URL(endpoint).hostname) : null
+  } catch {
+    kind = null
+  }
+  if (kind === 'tailscale') {
+    return t(
+      'auto.components.settings.RuntimeEnvironmentsPane.routeDirectTailscale',
+      'Direct · Tailscale'
+    )
+  }
+  if (kind === 'lan') {
+    return t('auto.components.settings.RuntimeEnvironmentsPane.routeDirectLan', 'Direct · LAN')
+  }
+  return t('auto.components.settings.RuntimeEnvironmentsPane.routeDirect', 'Direct')
 }
 
 export function getRuntimeServerConnectionLabel(

@@ -5,6 +5,8 @@ export type ServeOptionValidationInput = {
   bind?: string | null
   noPairing: boolean
   mobilePairing: boolean
+  /** Also mint a runtime pairing link that reaches this host through Orca Relay. */
+  relay?: boolean
   grantDesktopControl?: boolean
   allowPublic?: boolean
   refusePublic?: boolean
@@ -34,6 +36,15 @@ export function getServeOptionValidationError(options: ServeOptionValidationInpu
   }
   if (options.recipeJson && !options.projectRoot) {
     return 'Recipe JSON output requires --project-root.'
+  }
+  if (options.relay && options.noPairing) {
+    return 'Relay pairing requires a pairing link; remove --no-pairing.'
+  }
+  if (options.relay && options.mobilePairing) {
+    return 'Use either --relay or --mobile-pairing, not both; --relay applies to runtime pairing.'
+  }
+  if (options.relay && options.recipeJson) {
+    return 'Recipe JSON output prints the direct pairing link only; remove --relay.'
   }
   return null
 }

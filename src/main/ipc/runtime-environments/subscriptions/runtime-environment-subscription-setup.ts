@@ -16,9 +16,9 @@ import {
 import { resolveEnvironment } from '../../../../shared/remote-runtime/host-store/runtime-environment-store'
 import { RuntimeEnvironmentStoreError } from '../../../../shared/remote-runtime/host-store/runtime-environment-store-records'
 import { isRuntimeEnvironmentManuallyDisconnected } from '../connectivity/runtime-environment-manual-disconnect'
-import { getPreferredPairedRuntimeConnection } from '../../../../shared/remote-runtime/host-catalog/runtime-environments'
 import { getAcceptedRuntimeEnvironmentCapabilityOutcome } from '../connections/runtime-environment-capability-evidence'
 import { getRuntimeEnvironmentStatusSnapshot } from '../connections/runtime-environment-request-connections'
+import { getRuntimeEnvironmentDialConnection } from '../relay-route/runtime-relay-route'
 
 export type RuntimeEnvironmentSubscribeArgs = {
   selector: string
@@ -273,9 +273,10 @@ export async function assertSettledCrewSubscriptionCurrent(
 }
 
 export function assertCrewSourceCurrent(
+  userDataPath: string,
   environment: Awaited<ReturnType<typeof resolveEnvironment>>
 ): void {
-  const connection = getPreferredPairedRuntimeConnection(environment)
+  const connection = getRuntimeEnvironmentDialConnection(userDataPath, environment)
   const accepted = getAcceptedRuntimeEnvironmentCapabilityOutcome(
     environment.id,
     connection,

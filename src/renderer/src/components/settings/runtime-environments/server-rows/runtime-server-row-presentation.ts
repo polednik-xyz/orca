@@ -37,6 +37,8 @@ export type RuntimeServerStatusInput = {
   remoteUpdate: RemoteServerUpdateEntry | undefined
   /** A managed server whose loaded status has no active version. */
   managedNotRunning?: boolean
+  /** Appended to Connected, e.g. "Orca Relay" or "Direct · LAN". */
+  routeLabel?: string | null
 }
 
 export function getRuntimeServerStatusIndicator(
@@ -90,7 +92,7 @@ export function getRuntimeServerStatusIndicator(
   const label = getRuntimeServerConnectionLabel(input.connectionState, t)
   switch (input.connectionState) {
     case 'connected':
-      return { label, tone: 'success' }
+      return { label: input.routeLabel ? `${label} · ${input.routeLabel}` : label, tone: 'success' }
     case 'checking':
       return { label, tone: 'muted', busy: true }
     case 'reconnecting':

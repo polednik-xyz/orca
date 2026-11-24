@@ -11,6 +11,7 @@ export type ServeOptions = {
   pairingAddress: string | null
   noPairing: boolean
   mobilePairing: boolean
+  relay: boolean
   grantDesktopControl: boolean
   allowPublic: boolean
   refusePublic: boolean
@@ -128,6 +129,7 @@ export function getServeOptions(argv: readonly string[]): ServeOptions {
     ),
     noPairing: lastBooleanValue(optionsArgv, ['--serve-no-pairing', '--no-pairing']),
     mobilePairing: lastBooleanValue(optionsArgv, ['--serve-mobile-pairing', '--mobile-pairing']),
+    relay: lastBooleanValue(optionsArgv, ['--serve-relay', '--relay']),
     grantDesktopControl: lastBooleanValue(optionsArgv, [
       '--serve-grant-desktop-control',
       '--grant-desktop-control'

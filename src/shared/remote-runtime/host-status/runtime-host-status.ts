@@ -22,6 +22,8 @@ export type RuntimeHostStatusSnapshot = {
   blockedReason?: RuntimeHostBlockedReason
   transport: 'unknown' | 'connecting' | 'ready' | 'disconnected'
   remoteControl?: RemoteRuntimeSharedConnectionDiagnostics | null
+  /** How the last host connection was carried; absent until a Relay-capable server connects. */
+  route?: 'direct' | 'relay'
   retired?: true
 }
 
